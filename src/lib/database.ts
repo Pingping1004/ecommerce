@@ -4,7 +4,6 @@ import mongoose from "mongoose";
 const uri: string = process.env.MONGODB_URI || '';
 const options: mongoose.ConnectOptions = {
     tls: true,
-    // tlsCAFile: "C:/Ecommerce-web/myapp/localhost.pem",
 };
 
 // Caching the Mongoose connection in development mode
@@ -33,7 +32,7 @@ export async function connectToDatabase() {
     // Use cached promise if available, otherwise create a new one
     if (!cached.promise) {
       cached.promise = mongoose
-        .connect(uri, options)
+        .connect(uri, { ...options, dbName: 'project' })
         .then((mongooseInstance) => mongooseInstance);
     }
 
