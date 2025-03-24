@@ -1,9 +1,8 @@
 import mongoose, { Schema, Document } from "mongoose";
-import bcrypt from "bcryptjs";
 
 export interface User extends Document {
     email: string;
-    password: string;
+    password?: string; // Make password optional
     role?: "seller" | "buyer";
     username?: string;
     createdAt: Date;
@@ -12,23 +11,13 @@ export interface User extends Document {
 const UserSchema = new Schema<User>(
     {
         email: { type: String, required: true, unique: true },
-        password: { type: String, required: true },
+        password: { type: String, required: false }, // Explicitly mark as not required
         role: { type: String, enum: ["buyer", "seller"], default: "buyer" },
         username: { type: String },
         createdAt: { type: Date, default: Date.now },
     },
     { timestamps: true, collection: "Users" }
 );
-
-// Pre-save hook to hash password
-UserSchema.pre<User>("save", async function (next) {
-    if (this.isModified("password")) {
-        console.log("Hashing password before saving"); // Debugging: Log password hashing
-        this.password = await bcrypt.hash(this.password, 12);
-        console.log("Hashed password:", this.password); // Debugging: Log hashed password
-    }
-    next();
-});
 
 // Pre-save hook to derive username from email
 UserSchema.pre<User>("save", async function (next) {

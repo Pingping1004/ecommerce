@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import User from "../../models/User";
 import { signToken } from "@/lib/jwt";
+import { serialize } from "cookie";
+import { NextResponse } from "next/server";
 
 export const signupUser = async (
     email: string,
@@ -15,15 +17,17 @@ export const signupUser = async (
         const existingUser = await User.findOne({ email });
         if (existingUser) throw new Error("User already exists");
 
-        const hashedPassword = await bcrypt.hash(password, 12);
+        const hashedPassword = await bcrypt.hash(password, 12); // Hash password here
         const newUser = new User({
             email,
-            password: hashedPassword,
+            password: hashedPassword, // Save hashed password
             username,
             role,
         });
 
         await newUser.save();
+        console.log("Signup user: ", newUser);
+
         const tokenPayload = {
             id: newUser._id,
             username: newUser.username,
@@ -32,13 +36,21 @@ export const signupUser = async (
         };
 
         console.log("Token payload for signup:", tokenPayload); // Debugging: Log token payload
-        return signToken(JSON.stringify(tokenPayload)); // Pass plain object
+        const token = signToken(JSON.stringify(tokenPayload)); // Pass plain object
+        console.log("Token: ", token);
+
+        const response = NextResponse.json(
+            { message: "Authentication successful" },
+            { status: 200 }
+        );
+        serializeCookie(response, token); // Set the cookie on the response
+
+        return response;
     } catch (error) {
-        if (error instanceof Error) {
-            console.error("Signup error:", error.message);
-        } else {
-            console.error("Signup error:", error);
-        }
+        console.error(
+            "Signup error:",
+            error instanceof Error ? error.message : error
+        );
         throw new Error("Signup failed");
     }
 };
@@ -47,16 +59,17 @@ export const loginUser = async (email: string, password: string) => {
     try {
         console.log("Login attempt with email:", email); // Debugging: Log email being queried
         const user = await User.findOne({ email });
+
         if (!user) {
             console.error("User not found for email:", email); // Debugging: Log if user is not found
             throw new Error("User has not registered yet");
         }
 
         console.log("User found:", user); // Debugging: Log user data (excluding sensitive info)
-        console.log("Hashed password in DB:", user.password); // Debugging: Log hashed password
-        console.log("Plain text password:", password); // Debugging: Log plain text password
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password); // Compare plain text password with hashed password
+        console.log("Plain text password:", password); // Debugging: Log plain text password
+        console.log("Hashed password in DB:", user.password); // Debugging: Log hashed password
         console.log("Password match result:", isMatch); // Debugging: Log password comparison result
 
         if (!isMatch) {
@@ -69,13 +82,34 @@ export const loginUser = async (email: string, password: string) => {
             role: user.role,
         };
         console.log("Token payload for login:", tokenPayload); // Debugging: Log token payload
-        return signToken(JSON.stringify(tokenPayload)); // Pass plain object
+        const token = signToken(JSON.stringify(tokenPayload));
+        console.log("Token: ", token);
+
+        const response = NextResponse.json(
+            { message: "Authentication successful" },
+            { status: 200 }
+        );
+        serializeCookie(response, token); // Set the cookie on the response
+
+        return response;
     } catch (error) {
-        if (error instanceof Error) {
-            console.error("Login error:", error.message); // Debugging: Log error message
-        } else {
-            console.error("Login error:", error); // Handle non-Error types
-        }
-        throw error;
+        console.error(
+            "Login error:",
+            error instanceof Error ? error.message : error
+        );
+        throw new Error("Login failed");
     }
 };
+
+export function serializeCookie(res: NextResponse, token: string) {
+    const cookie = serialize("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+        maxAge: 7 * 24 * 60 * 60,
+    });
+
+    res.headers.append("Set-Cookie", cookie); // Use append to set the cookie
+    console.log("Setting cookie: ", cookie);
+}

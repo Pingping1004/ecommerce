@@ -59,7 +59,7 @@ export default function SignupPage() {
                                     Enter your email and password
                                 </p>
                                 <button
-                                    // type="button"
+                                    type="button" // prevent form submission
                                     className="w-full px-6 py-5 mb-10 text-sm font-medium leading-none text-white transition duration-500 md:w-96 rounded-2xl bg-gray-500 hover:bg-gray-600 hover:cursor-pointer focus:ring-4 focus:ring-purple-blue-100 bg-purple-blue-500"
                                     onClick={handleGoogleSignup}
                                 >
@@ -83,7 +83,7 @@ export default function SignupPage() {
                                     placeholder="Enter your email"
                                     onChange={handleChange}
                                     value={form.email} // Ensure value is bound to state
-                                    required
+                                    // required
                                     className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                 />
                                 <label
@@ -99,7 +99,7 @@ export default function SignupPage() {
                                     placeholder="Enter password"
                                     onChange={handleChange}
                                     value={form.password} // Ensure value is bound to state
-                                    required
+                                    // required
                                     className="flex items-center w-full px-5 py-4 mb-12 mr-2 text-sm font-medium outline-none placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                 />
                                 <div className="flex justify-center">

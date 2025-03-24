@@ -1,8 +1,8 @@
 import { signupUser } from "@/features/auth/authService";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/database";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
         await connectToDatabase();
 
@@ -12,9 +12,9 @@ export async function POST(req: Request) {
         const { email, password, username, role } = body; // Ensure correct destructuring
         if (!password) throw new Error("Password is required"); // Validate password
 
-        const token = await signupUser(email, password, username, role); // Pass arguments in correct order
+        const response = await signupUser(email, password, username, role); // Call signupUser without res
 
-        return NextResponse.json({ token }, { status: 201 });
+        return response; // Return the response from signupUser
     } catch (error: any) {
         console.error("Signup error:", error.message); // Debugging: Log the error
         return NextResponse.json({ error: error.message }, { status: 400 });

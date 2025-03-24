@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/database";
 import { loginUser } from "@/features/auth/authService";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
         await connectToDatabase();
 
@@ -14,10 +14,9 @@ export async function POST(req: Request) {
             throw new Error("Password is required");
         }
 
-        const token = await loginUser(email, password);
-        console.log("Generated token:", token); // Debugging: Log generated token
+        const response = await loginUser(email, password); // Call loginUser without res
 
-        return NextResponse.json({ token }, { status: 200 });
+        return response; // Return the response from loginUser
     } catch (error: any) {
         console.error("Login route error:", error.message); // Debugging: Log error message
         return NextResponse.json({ error: error.message }, { status: 400 });
