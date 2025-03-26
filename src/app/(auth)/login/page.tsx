@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 
 export default function LoginPage() {
     const [form, setForm] = useState({ email: "", password: "" });
@@ -60,7 +61,7 @@ export default function LoginPage() {
                                 </p>
                                 <button
                                     type="button" // Prevent form submission
-                                    className="w-full px-6 py-5 mb-10 text-sm font-medium leading-none text-white transition duration-500 md:w-96 rounded-2xl bg-gray-500 hover:bg-gray-600 hover:cursor-pointer focus:ring-4 focus:ring-purple-blue-100 bg-purple-blue-500"
+                                    className="w-full px-6 py-5 mb-10 text-sm font-medium leading-none text-white transition duration-500 md:w-96 rounded-2xl bg-gray-400 hover:bg-gray-500 hover:cursor-pointer focus:ring-4 focus:ring-purple-blue-100 bg-purple-blue-500"
                                     onClick={handleGoogleLogin}
                                 >
                                     Sign In with Google
@@ -111,18 +112,18 @@ export default function LoginPage() {
                                     </a>
                                 </div>
                                 <div className="flex justify-center">
-                                    <button className="w-full px-6 py-5 mb-10 text-sm font-bold leading-none text-white transition duration-500 md:w-96 rounded-2xl bg-blue-500 hover:bg-blue-600 hover:cursor-pointer focus:ring-4 focus:ring-purple-blue-100 bg-purple-blue-500">
+                                    <button className="w-full px-6 py-5 mb-10 text-sm font-bold leading-none text-white transition duration-500 md:w-96 rounded-2xl bg-gray-700 hover:bg-gray-800 hover:cursor-pointer focus:ring-4 focus:ring-purple-blue-100 bg-purple-blue-500">
                                         Sign In
                                     </button>
                                 </div>
                                 <p className="text-sm leading-relaxed text-gray-900">
                                     Not registered yet?{" "}
-                                    <a
+                                    <Link
                                         href="/signup"
                                         className="font-[700] text-blue-400 transition duration-500 hover:text-blue-600"
                                     >
                                         Create an Account
-                                    </a>
+                                    </Link>
                                 </p>
                             </form>
                         </div>

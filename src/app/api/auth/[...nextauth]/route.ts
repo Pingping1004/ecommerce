@@ -5,10 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { connectToDatabase } from "@/lib/database";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
-import { serialize } from "cookie";
 import jwt from "jsonwebtoken";
-import { NextResponse } from "next/server";
-import { serializeCookie } from "@/features/auth/authService";
 
 declare module "next-auth" {
     interface AdapterUser {
@@ -45,6 +42,11 @@ export const authOptions: NextAuthOptions = {
         FacebookProvider({
             clientId: process.env.FACEBOOK_CLIENT_ID || "",
             clientSecret: process.env.FACEBOOK_CLIENT_SECRET || "",
+            authorization: {
+              params: {
+                scope: 'email public_profile',
+              }
+            }
         }),
 
         CredentialsProvider({
@@ -116,6 +118,7 @@ export const authOptions: NextAuthOptions = {
                 );
 
                 token.accessToken = generatedToken;
+                token.provider = account.provider;
             }
             return token;
         },
@@ -130,6 +133,7 @@ export const authOptions: NextAuthOptions = {
                     role?: string | undefined;
                 };
             }
+
             return session;
         },
         
@@ -163,6 +167,7 @@ export const authOptions: NextAuthOptions = {
                         email,
                         username,
                         role,
+                        providers: [account.provider],
                         // Do not include password for OAuth users
                     });
 

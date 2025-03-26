@@ -28,5 +28,7 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/login", req.url));
     }
 
+    console.log('Auth provider: ', req.nextUrl.searchParams.get('provider'));
+
     return NextResponse.next();
 }
