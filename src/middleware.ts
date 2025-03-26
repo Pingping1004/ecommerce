@@ -1,37 +1,32 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export function middleware(req: NextRequest) {
-    const token = req.cookies.get("token");
-    const authHeader = req.headers.get('authorization');
-    const isTokenInAuthHeader = authHeader?.startsWith('Bearer ');
+export async function middleware(req: NextRequest) {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const publicPaths = ['/signup', '/login', 'favicon.ico', '_next/static'];
+    const authPaths = ['/oauth-callback', '/api/auth/callback', '/api/auth'];
 
-    // Log token found in Authorization header
-    if (isTokenInAuthHeader) {
-        console.log('Middleware: token found in Authorization header');
-    }
+    const bearerToken = req.headers.get('authorization');
+    const authHeader = bearerToken?.split(' ')[1];
+    const isTokenInAuthHeader = bearerToken?.startsWith('Bearer ');
 
-    // // Check if we have either a JWT token in the cookie or OAuth token in the request
-    // if (!token && !isTokenInAuthHeader) {
-    //     // If there's no token and the request is not for login/signup, redirect to login page
-    //     if (!["/login", "/signup", "/oauth-callback"].includes(req.nextUrl.pathname)) {
-    //         console.log("Middleware: No token found, redirecting to login page");
-    //         return NextResponse.redirect(new URL("/login", req.url));
-    //     }
-    // }
+    console.log('Auth header: ', authHeader);
+    console.log('Token auth header: ', isTokenInAuthHeader)
 
-    if ((token ||  isTokenInAuthHeader) || (
-        req.nextUrl.pathname === "/login" ||
-        req.nextUrl.pathname === "/signup" ||
-        req.nextUrl.pathname.startsWith("/api/auth/callback") ||
-        req.nextUrl.pathname === "/dashboard" // Allow access to dashboard after OAuth login
-    )) {
+    const includeAuthPaths = authPaths.some(path => req.nextUrl.pathname.startsWith(path));
+    const includePublicPaths = publicPaths.some(path => req.nextUrl.pathname.startsWith(path));
+ 
+    console.log("Middleware token:", token);
+
+    // Prevent infinite redirect loop by allowing access to "/login"
+    if (req.nextUrl.pathname === "/login") {
         return NextResponse.next();
     }
 
-    // if (!token && !isTokenInAuthHeader && !["/login", "/signup", "/oauth-callback"].includes(req.nextUrl.pathname)) {
-    //     console.log("Middleware: No token found, redirecting to login page");
-    //     return NextResponse.redirect(new URL("/login", req.url));
-    // }    
+    // Prevent accessing protected route api without auth
+    if ((!token && !isTokenInAuthHeader) && !includeAuthPaths && !includePublicPaths) {
+        return NextResponse.redirect(new URL("/login", req.url));
+    }
 
     return NextResponse.next();
 }
