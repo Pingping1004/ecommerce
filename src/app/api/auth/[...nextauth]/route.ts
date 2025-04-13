@@ -8,20 +8,20 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 declare module "next-auth" {
-    interface AdapterUser {
-        role?: string;
-    }
     interface User {
         role?: string;
+        username?: string;
     }
 
     interface Session {
         user?: {
+            name?: string | null;
             username?: string | null;
             email?: string | null;
             image?: string | null;
             role?: string;
         };
+        accessToken?: string;
     }
 }
 
@@ -37,16 +37,6 @@ export const authOptions: NextAuthOptions = {
                     response_type: "code",
                 },
             },
-        }),
-
-        FacebookProvider({
-            clientId: process.env.FACEBOOK_CLIENT_ID || "",
-            clientSecret: process.env.FACEBOOK_CLIENT_SECRET || "",
-            authorization: {
-              params: {
-                scope: 'email public_profile',
-              }
-            }
         }),
 
         CredentialsProvider({
@@ -71,6 +61,7 @@ export const authOptions: NextAuthOptions = {
                     email: string;
                     password?: string;
                     role?: string;
+                    image?: string;
                 } | null;
 
                 // 🔹 Check if user signed up via OAuth (Google, Facebook)
@@ -89,9 +80,10 @@ export const authOptions: NextAuthOptions = {
 
                 return {
                     id: user._id.toString(),
-                    name: user.username,
+                    username: user.username,
                     email: user.email,
-                    role: user.role,
+                    role: user.role || "buyer",
+                    image: user.image,
                 };
             },
         }),
@@ -102,15 +94,13 @@ export const authOptions: NextAuthOptions = {
             console.log("JWT Callback: ", { token, user, account });
             if (user) {
                 token.role = user.role || "user";
+                token.username = user.username; // attach username as a separate field
                 token.user = user;
             }
 
             // If OAuth login, manually generate a JWT and attach it to the token
-            if (
-                account?.provider === "google" ||
-                account?.provider === "facebook"
-            ) {
-                const secret = process.env.NEXTAUTH_SECRET || '';
+            if (account?.provider === "google") {
+                const secret = process.env.NEXTAUTH_SECRET || "";
                 const generatedToken = jwt.sign(
                     { email: token.email, role: token.role },
                     secret,
@@ -125,25 +115,18 @@ export const authOptions: NextAuthOptions = {
         async session({ session, token }) {
             console.log("Session Callback: ", { session, token });
             if (session?.user) {
+                // Map token fields to session.user without overriding the object entirely
                 session.user.role = token.role as string | undefined;
-                session.user = token.user as {
-                    username?: string | null | undefined;
-                    email?: string | null | undefined;
-                    image?: string | null | undefined;
-                    role?: string | undefined;
-                };
+                session.user.username = token.username as string | undefined;
+                session.accessToken = token.accessToken as string;
             }
-
             return session;
         },
-        
+
         async signIn({ account, profile }) {
             console.log("OAuth SignIn Callback: ", { account, profile });
 
-            if (
-                account?.provider === "google" ||
-                account?.provider === "facebook"
-            ) {
+            if (account?.provider === "google") {
                 // More detailed logging here
                 console.log("OAuth Account: ", account);
                 console.log("OAuth Profile: ", profile);
@@ -153,6 +136,7 @@ export const authOptions: NextAuthOptions = {
                 const email = profile?.email;
                 const username = email?.split("@")[0]; // Derive username from email
                 const role = "buyer"; // Default role for OAuth users
+                const image = profile?.image;
 
                 if (!email) {
                     console.error("Email is missing from the profile");
@@ -167,6 +151,7 @@ export const authOptions: NextAuthOptions = {
                         email,
                         username,
                         role,
+                        image,
                         providers: [account.provider],
                         // Do not include password for OAuth users
                     });
@@ -185,7 +170,10 @@ export const authOptions: NextAuthOptions = {
                 return `${baseUrl}/dashboard`;
             }
             // If coming from /login or /signup, force dashboard
-            if (url.startsWith(`${baseUrl}/login`) || url.startsWith(`${baseUrl}/signup`)) {
+            if (
+                url.startsWith(`${baseUrl}/login`) ||
+                url.startsWith(`${baseUrl}/signup`)
+            ) {
                 return `${baseUrl}/dashboard`;
             }
             if (url.startsWith(baseUrl)) {

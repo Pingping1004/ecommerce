@@ -5,6 +5,7 @@ export interface User extends Document {
     password?: string; // Make password optional
     role?: "seller" | "buyer";
     username?: string;
+    image?: string;
     createdAt: Date;
 }
 
@@ -15,6 +16,7 @@ const UserSchema = new Schema<User>(
         role: { type: String, enum: ["buyer", "seller"], default: "buyer" },
         username: { type: String },
         createdAt: { type: Date, default: Date.now },
+        image: { type: String },
     },
     { timestamps: true, collection: "Users" }
 );
@@ -34,5 +36,4 @@ UserSchema.pre<User>("save", async function (next) {
     next();
 });
 
-export default mongoose.models.User ||
-    mongoose.model<User>("User", UserSchema, "Users");
+export default mongoose.models.User || mongoose.model<User>("User", UserSchema, "Users");
