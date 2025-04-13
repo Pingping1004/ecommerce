@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
-import User from "../../models/User";
+import User from "@/models/User";
+import { connectToDatabase } from "@/lib/database";
 import { signToken } from "@/lib/jwt";
 import { serialize } from "cookie";
 import { NextResponse } from "next/server";
@@ -36,14 +37,14 @@ export const signupUser = async (
         };
 
         console.log("Token payload for signup:", tokenPayload); // Debugging: Log token payload
-        const token = signToken(JSON.stringify(tokenPayload)); // Pass plain object
+        const token = signToken(tokenPayload); // Pass plain object
         console.log("Token: ", token);
 
         const response = NextResponse.json(
             { message: "Authentication successful" },
             { status: 200 }
         );
-        serializeCookie(response, token); // Set the cookie on the response
+        serializeCookie(response, await token); // Set the cookie on the response
 
         return response;
     } catch (error) {
@@ -57,6 +58,9 @@ export const signupUser = async (
 
 export const loginUser = async (email: string, password: string) => {
     try {
+        await connectToDatabase(); // Ensure database connection
+        console.log("User model:", User); // Debugging: Log the User model
+
         console.log("Login attempt with email:", email); // Debugging: Log email being queried
         const user = await User.findOne({ email });
 
@@ -81,15 +85,16 @@ export const loginUser = async (email: string, password: string) => {
             email: user.email,
             role: user.role,
         };
+
         console.log("Token payload for login:", tokenPayload); // Debugging: Log token payload
-        const token = signToken(JSON.stringify(tokenPayload));
+        const token = signToken(tokenPayload);
         console.log("Token: ", token);
 
         const response = NextResponse.json(
             { message: "Authentication successful" },
             { status: 200 }
         );
-        serializeCookie(response, token); // Set the cookie on the response
+        serializeCookie(response, await token); // Set the cookie on the response
 
         return response;
     } catch (error) {
@@ -113,3 +118,32 @@ export function serializeCookie(res: NextResponse, token: string) {
     res.headers.append("Set-Cookie", cookie); // Use append to set the cookie
     console.log("Setting cookie: ", cookie);
 }
+
+export const logoutUser = async () => {
+    try {
+        const response = NextResponse.json(
+            { message: "Logout successful" },
+            { status: 200 }
+        );
+
+        // Clear the token cookie
+        const cookie = serialize("token", "", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/",
+            expires: new Date(0), // Set the cookie to expire immediately
+        });
+
+        response.headers.append("Set-Cookie", cookie); // Use append to clear the cookie
+        console.log("Clearing cookie: ", cookie);
+
+        return response;
+    } catch (error) {
+        console.error(
+            "Logout error:",
+            error instanceof Error ? error.message : error
+        );
+        throw new Error("Logout failed");
+    }
+};

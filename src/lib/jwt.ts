@@ -1,19 +1,24 @@
-import jwt from 'jsonwebtoken';
+import { SignJWT, jwtVerify, JWTPayload } from "jose";
 
-const SECRET_KEY = process.env.JWT_SECRET;
+const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET);
 
 if (!SECRET_KEY) {
-    throw new Error('JWT_SECRET environment variable is not set')
+    throw new Error("JWT_SECRET environment variable is not set");
 }
 
-export const signToken = (userId: string) => {
-    return jwt.sign({ userId }, SECRET_KEY, { expiresIn: '7d' });
-}
+export const signToken = async (payload: JWTPayload) => {
+    return new SignJWT(payload)
+        .setProtectedHeader({ alg: "HS256" })
+        .setExpirationTime("7d")
+        .sign(SECRET_KEY);
+};
 
-export const verifyToken = (token: string) => {
+export const verifyToken = async (token: string) => {
     try {
-        return jwt.verify(token, SECRET_KEY);
+        const { payload } = await jwtVerify(token, SECRET_KEY);
+        return payload;
     } catch (error) {
-        return null;
+        console.error("Token verification failed:", error);
+        throw new Error("Invalid token");
     }
-}
+};

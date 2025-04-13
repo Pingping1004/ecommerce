@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { verifyToken } from "./lib/jwt";
 
 export async function middleware(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
@@ -15,6 +16,10 @@ export async function middleware(req: NextRequest) {
     const bearerToken = req.headers.get("authorization");
     const authHeader = bearerToken?.split(" ")[1];
     const isTokenInAuthHeader = bearerToken?.startsWith("Bearer ");
+
+    if (authHeader) {
+        const decoded = verifyToken(authHeader);
+    }
 
     console.log("Auth header: ", authHeader);
     console.log("Token auth header: ", isTokenInAuthHeader);

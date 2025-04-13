@@ -5,6 +5,7 @@ import axios from "axios";
 import { useSession } from "next-auth/react";
 import type { User as UserModel } from "@/models/User";
 import { useRouter } from "next/navigation";
+import { logoutUser } from "@/features/auth/authService";
 
 type UserType = Pick<UserModel, 'username' | 'email' | 'role'>;
 
@@ -13,6 +14,15 @@ export default function DashboardPage() {
     const { data: session, status } = useSession();
     const token = session?.accessToken;
     const router = useRouter();
+
+    const logout = async () => {
+        try {
+            await logoutUser();
+            router.push('/login');
+        } catch (error) {
+            console.error('Logout failed', error);
+        }
+    }
 
     useEffect(() => {
         if (status === 'loading') return;
@@ -45,6 +55,12 @@ export default function DashboardPage() {
             <>
                 <p>Username: {user?.username}</p>
                 <p>Role: {user?.role}</p>
+                <button 
+                    className="p-2 bg-white text-primary cursor-pointer"
+                    onClick={logout}
+                >
+                    Logout
+                </button>
             </>
           ): (
             <p>Loading user data...</p>
