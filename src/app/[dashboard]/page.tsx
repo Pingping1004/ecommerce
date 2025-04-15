@@ -4,21 +4,23 @@ import React, { useContext } from "react";
 import { UserContext, UserContextType } from "@/context/UserContext";
 import { ProductContext, ProductContextType } from "@/context/ProductContext";
 import { useRouter } from "next/navigation";
-import { logoutUser } from "@/features/auth/authService";
 
 export default function DashboardPage() {
     const userContext = useContext<UserContextType | null>(UserContext);
-    const productContext = useContext<ProductContextType | null>(ProductContext);
+    const productContext = useContext<ProductContextType | null>(
+        ProductContext
+    );
     const router = useRouter();
 
     const logout = async () => {
         try {
+            const { logoutUser } = await import("@/features/auth/authService");
             await logoutUser();
-            router.push('/login');
+            router.push("/login");
         } catch (error) {
-            console.error('Logout failed', error);
+            console.error("Logout failed", error);
         }
-    }
+    };
 
     if (!userContext || !productContext) {
         return <div>Loading...</div>;
