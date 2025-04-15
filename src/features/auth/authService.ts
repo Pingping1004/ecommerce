@@ -4,6 +4,7 @@ import { connectToDatabase } from "@/lib/database";
 import { signToken } from "@/lib/jwt";
 import { serialize } from "cookie";
 import { NextResponse } from "next/server";
+import { signOut } from "next-auth/react";
 
 export const signupUser = async (
     email: string,
@@ -88,7 +89,6 @@ export const loginUser = async (email: string, password: string) => {
 
         console.log("Token payload for login:", tokenPayload); // Debugging: Log token payload
         const token = signToken(tokenPayload);
-        console.log("Token: ", token);
 
         const response = NextResponse.json(
             { message: "Authentication successful" },
@@ -119,31 +119,13 @@ export function serializeCookie(res: NextResponse, token: string) {
     console.log("Setting cookie: ", cookie);
 }
 
-export const logoutUser = async () => {
-    try {
-        const response = NextResponse.json(
-            { message: "Logout successful" },
-            { status: 200 }
-        );
-
-        // Clear the token cookie
-        const cookie = serialize("token", "", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            path: "/",
-            expires: new Date(0), // Set the cookie to expire immediately
-        });
-
-        response.headers.append("Set-Cookie", cookie); // Use append to clear the cookie
-        console.log("Clearing cookie: ", cookie);
-
-        return response;
-    } catch (error) {
-        console.error(
-            "Logout error:",
-            error instanceof Error ? error.message : error
-        );
-        throw new Error("Logout failed");
+export async function logoutUser() {
+    await signOut({ redirect: false });
+    // Custom cookie clearing: remove the "token" cookie by setting a past expiry.
+    if (typeof window !== "undefined") {
+        document.cookie =
+            "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        console.log("Custom token cookie cleared.");
     }
-};
+    // ...additional custom cookie clearing if needed...
+}

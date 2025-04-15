@@ -19,14 +19,18 @@ export async function GET(req: NextRequest) {
         }
 
         let userEmail = session?.user?.email;
-        const user = await User.findOne({ email: userEmail });
-
-        // If token is present, validate it (for normal login users)
-        if (!userEmail && token) {
+        // Only try token verification if we don't have a session email.
+        if (!userEmail) {
+            if (!token) {
+                return NextResponse.json(
+                    { error: "Unauthorized" },
+                    { status: 401 }
+                );
+            }
             try {
-                const decodedToken: any = verifyToken(token);
+                const decodedToken: any = await verifyToken(token);
                 userEmail = decodedToken.email;
-                console.log('Decoded email: ', decodedToken.email)
+                console.log("Decoded email: ", decodedToken.email);
             } catch (err) {
                 return NextResponse.json(
                     { error: "Invalid token" },
@@ -35,6 +39,7 @@ export async function GET(req: NextRequest) {
             }
         }
 
+        const user = await User.findOne({ email: userEmail });
         if (!user)
             return NextResponse.json(
                 { message: "User not found" },

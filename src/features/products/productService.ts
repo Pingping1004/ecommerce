@@ -2,6 +2,18 @@ import Product, { ProductType } from "@/models/Product";
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/database";
 
+export async function getProducts() {
+    try {
+        await connectToDatabase();
+        const products = await Product.find({});
+        console.log("Fetched products: ", products);
+        return NextResponse.json(products, { status: 200 });
+    } catch (error: any) {
+        console.error("Error fetching products:", error.message);
+        return NextResponse.json({ error: 'Failed to get products' }, { status: 500 });
+    }
+}
+
 export async function addProduct(newProduct: ProductType) {
     try {
         await connectToDatabase();

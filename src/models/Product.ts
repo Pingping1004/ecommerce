@@ -4,9 +4,9 @@ import { User } from './User';
 export interface ProductType extends Document {
     user: User,
     name: string;
-    description: string;
+    description?: string;
     price: number;
-        category?:
+    category?:
         | "Apparel"
         | "Electronics"
         | "Home"

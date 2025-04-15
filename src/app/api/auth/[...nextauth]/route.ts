@@ -67,7 +67,7 @@ export const authOptions: NextAuthOptions = {
                 // 🔹 Check if user signed up via OAuth (Google, Facebook)
                 if (!user || !user.password) {
                     throw new Error(
-                        "This email is registered via Google or Facebook. Please log in with that provider."
+                        "This email is registered via Google. Please log in with that provider."
                     );
                 }
 
@@ -165,11 +165,14 @@ export const authOptions: NextAuthOptions = {
         },
         async redirect({ url, baseUrl }) {
             console.log("Redirect URL:", url);
-            // If the OAuth callback is triggering redirection, send the user to /dashboard
+            const parsedUrl = new URL(url, baseUrl);
+            const tokenParam = parsedUrl.searchParams.get("token");
+            if (tokenParam) {
+                return `${baseUrl}/dashboard?token=${tokenParam}`;
+            }
             if (url.includes("/api/auth/callback")) {
                 return `${baseUrl}/dashboard`;
             }
-            // If coming from /login or /signup, force dashboard
             if (
                 url.startsWith(`${baseUrl}/login`) ||
                 url.startsWith(`${baseUrl}/signup`)
