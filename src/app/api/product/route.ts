@@ -1,35 +1,29 @@
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/route";
-import { verifyToken } from "@/lib/jwt";
 import { addProduct, getProducts } from "@/features/products/productService";
 
 export const runtime = "nodejs"; // Ensure the API route uses the Node.js runtime
 
 export async function GET(req: NextRequest) {
     try {
-        console.log("Fetching products");
+        const authHeader = req.headers.get("Authorization");
+        console.log("Auth header received:", authHeader);
 
-        const token = req.headers.get("Authorization")?.split(" ")[1];
-        const session = await getServerSession(authOptions);
-        if (!token && !session) {
+        if (!authHeader?.startsWith("Bearer ")) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "No token provided" },
                 { status: 401 }
             );
         }
 
         const products = await getProducts();
-        return NextResponse.json(
-            { data: products, message: "Products fetched successfully" },
-            { status: 200 });
+        console.log("Products being sent:", products); // Debug log
+        return NextResponse.json(products); // Send array directly
     } catch (error) {
-        console.error(
-            "Error fetching products:",
-            error instanceof Error ? error.message : error
-        );
+        console.error("Product fetch error:", error);
         return NextResponse.json(
-            { error: "Failed to get products" },
+            { error: "Failed to fetch products" },
             { status: 500 }
         );
     }
@@ -42,16 +36,28 @@ export async function POST(req: NextRequest) {
 
         // Validate the request body here if needed
         if (!newProduct) {
+            console.error("Invalid request body");
             return NextResponse.json(
                 { error: "Invalid request body" },
                 { status: 400 }
             );
         }
 
-        const token = req.headers.get("Authorization")?.split(" ")[1];
+        const authHeader = req.headers.get("Authorization");
+        console.log("Auth header received:", authHeader);
+
+        if (!authHeader?.startsWith("Bearer ")) {
+            return NextResponse.json(
+                { error: "No token provided" },
+                { status: 401 }
+            );
+        }
+
+        const token = authHeader.split(" ")[1];
         const session = await getServerSession(authOptions);
 
         if (!token && !session) {
+            console.error("Unauthorized access attempt");
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }

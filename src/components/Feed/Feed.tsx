@@ -1,55 +1,46 @@
 "use client";
 
-import React, { useContext } from "react";
-import UserContext, { UserContextType } from "@/context/UserContext";
-import ProductContext, { ProductContextType } from "@/context/ProductContext";
-import { AuthContext } from "@/context/AuthContext";
+import { useProductContext } from "@/context/ProductContext";
+import UserContext from "@/context/UserContext";
+import { useAuth } from "@/context/AuthContext";
+import { useEffect, useContext } from "react";
 
-export default function FeedPage() {
-    const userContext = useContext<UserContextType | null>(UserContext);
-
-    if (!userContext) {
-        return <div>Loading user context...</div>;
-    }
-
-    const { user } = userContext;
-    const { products } = useContext<ProductContextType>(ProductContext);
-    const { logout, isLoggedIn, isLoading } = useContext(AuthContext);
+export default function Feed() {
+    const { products, isLoading, error, refetchProducts } = useProductContext();
+    const { user } = useContext(UserContext)!;
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return <div>Loading products...</div>;
     }
 
-    if (!isLoggedIn) {
-        return <div>Please log in to access the dashboard</div>;
+    if (error) {
+        return (
+            <div>
+                <p>Error: {error}</p>
+                <button onClick={refetchProducts}>Retry</button>
+            </div>
+        );
     }
 
-    console.log('User context: ', user);
-    console.log('Product context: ', products);
-    console.log('Login state: ', isLoggedIn, 'Loading state: ', isLoading);
+    if (!products || products.length === 0) {
+        return <div>No products found</div>;
+    }
 
     return (
-        <>
-            <div>
-                <button
-                    className="bg-white text-black p-2 rounded-md hover:bg-gray-200 cursor-pointer"
-                    onClick={logout}
-                >
-                    Logout
-                </button>
-                <h1>User: {user?.username}</h1>
-                <h1>
-                    Products:
-                    {products?.map((product, index) => (
-                        <div key={index}>
-                            <h3>{product.name}</h3>
-                            <p>{product.description}</p>
-                            <p>{product.price}</p>
-                            <p>{product.category}</p>
-                        </div>
-                    ))}
-                </h1>
-            </div>
-        </>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <h1>User: {user?.username}</h1>
+            {products.map((product) => (
+                <div key={product._id} className="border p-4 rounded shadow-sm">
+                    <h2 className="text-xl font-bold">{product.name}</h2>
+                    <p className="text-gray-600">{product.description}</p>
+                    <p className="text-lg font-semibold mt-2">
+                        ${product.price}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                        Category: {product.category}
+                    </p>
+                </div>
+            ))}
+        </div>
     );
 }

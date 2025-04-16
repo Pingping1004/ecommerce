@@ -15,7 +15,7 @@ export default function LoginPage() {
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        console.log("Login form data:", form); // Debugging: log form data
+        console.log("Login form data:", form.email); // Debugging: log form data
 
         if (!form.password) {
             alert("Password is required");

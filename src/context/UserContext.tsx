@@ -9,7 +9,7 @@ import {
     SetStateAction,
 } from "react";
 import { useSession } from "next-auth/react";
-import { AuthContext } from "./AuthContext";
+import { useAuth } from "./AuthContext";
 
 export interface UserType {
     email: string;
@@ -26,12 +26,12 @@ export interface UserContextType {
 const UserContext = createContext<UserContextType | null>(null);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-    const { isLoggedIn } = useContext(AuthContext);
-    const { data: session } = useSession();
+    const { isLoggedIn } = useAuth();
+    const { data: session, status } = useSession();
     const [user, setUser] = useState<UserType | null>(null);
 
     useEffect(() => {
-        console.log("UserContext useEffect: session=", session, "status=", status);
+        console.log("UserContext useEffect: ", "status=", status);
         if (isLoggedIn && session?.user) {
             setUser({
                 email: session.user.email ?? "",

@@ -5,7 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { connectToDatabase } from "@/lib/database";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { signToken } from "@/lib/jwt";
 
 declare module "next-auth" {
     interface User {
@@ -15,6 +15,7 @@ declare module "next-auth" {
 
     interface Session {
         user?: {
+            id?: string;
             name?: string | null;
             username?: string | null;
             email?: string | null;
@@ -95,31 +96,42 @@ export const authOptions: NextAuthOptions = {
             // When a new user signs in, add additional fields
             if (user) {
                 token.email = user.email;
-                token.username = user.username || (user?.email ? user.email.split("@")[0] : null); // fallback
+                token.username =
+                    user.username ||
+                    (user?.email ? user.email.split("@")[0] : null); // fallback
                 token.role = user.role || "buyer";
                 token.id = user.id;
+
+                token.accessToken = await signToken({
+                    id: user.id,
+                    email: user.email,
+                    role: user.role || "buyer",
+                });
             }
             // For OAuth logins, add accessToken if needed.
             if (account?.provider === "google") {
                 const secret = process.env.NEXTAUTH_SECRET || "";
-                const generatedToken = jwt.sign(
-                    { email: token.email, role: token.role },
-                    secret,
-                    { expiresIn: "7d" }
-                );
+                const generatedToken = signToken({
+                    email: token.email,
+                    role: token.role,
+                });
                 token.accessToken = generatedToken;
                 token.provider = account.provider;
             }
             return token;
         },
+
         async session({ session, token }) {
             console.log("Session Callback:", { session, token });
             if (session?.user) {
+                session.user.id = token.id as string;
                 session.user.email = token.email as string;
                 session.user.username = token.username as string;
                 session.user.role = token.role as string;
                 session.accessToken = token.accessToken as string;
             }
+
+            console.log("Session callback result:", session);
             return session;
         },
 
