@@ -50,7 +50,7 @@ export const ProductProvider = ({
                 console.error("Failed to fetch products context", error);
             }
         }
-        // Only fetch products when user is authenticated
+
         if (status === "authenticated" && token) {
             fetchProducts();
         }

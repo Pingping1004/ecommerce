@@ -4,6 +4,7 @@ import React, { useContext } from "react";
 import { UserContext, UserContextType } from "@/context/UserContext";
 import { ProductContext, ProductContextType } from "@/context/ProductContext";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 export default function DashboardPage() {
     const userContext = useContext<UserContextType | null>(UserContext);
@@ -13,9 +14,9 @@ export default function DashboardPage() {
     const router = useRouter();
 
     const logout = async () => {
+        console.log("Logout function triggered"); // Debug log
         try {
-            const { logoutUser } = await import("@/features/auth/authService");
-            await logoutUser();
+            await signOut({ redirect: false });
             router.push("/login");
         } catch (error) {
             console.error("Logout failed", error);
@@ -29,6 +30,9 @@ export default function DashboardPage() {
     const { user } = userContext;
     const { products } = productContext;
 
+    console.log("User context: ", user); // Debug log
+    console.log("Product context: ", products); // Debug log
+
     return (
         <>
             <div>
@@ -38,8 +42,18 @@ export default function DashboardPage() {
                 >
                     Logout
                 </button>
-                <h1>{user?.username}</h1>
-                <h1>User</h1>
+                <h1>User: {user?.username}</h1>
+                <h1>
+                    Products: {
+                        products?.map((product) => {
+                            console.log("Product: ", product); // Debug log
+                            return (
+                                <div key={product.name}>
+                                    {product.name} - {product.price}
+                                </div>
+                            );
+                        })
+                    }</h1>
             </div>
         </>
     );

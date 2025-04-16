@@ -2,31 +2,28 @@ import bcrypt from "bcryptjs";
 import User from "@/models/User";
 import { connectToDatabase } from "@/lib/database";
 import { signToken } from "@/lib/jwt";
-import { serialize } from "cookie";
 import { NextResponse } from "next/server";
-import { signOut } from "next-auth/react";
 
 export const signupUser = async (
     email: string,
     password: string,
     username?: string,
-    role: string = "buyer" // Default role to "buyer"
+    role: string = "buyer"
 ) => {
     try {
-        if (!email) throw new Error("Email is required"); // Validate email
-        if (!password) throw new Error("Password is required"); // Validate password
+        if (!email) throw new Error("Email is required");
+        if (!password) throw new Error("Password is required");
 
         const existingUser = await User.findOne({ email });
         if (existingUser) throw new Error("User already exists");
 
-        const hashedPassword = await bcrypt.hash(password, 12); // Hash password here
+        const hashedPassword = await bcrypt.hash(password, 12);
         const newUser = new User({
             email,
-            password: hashedPassword, // Save hashed password
+            password: hashedPassword,
             username,
             role,
         });
-
         await newUser.save();
         console.log("Signup user: ", newUser);
 
@@ -37,15 +34,14 @@ export const signupUser = async (
             role: newUser.role,
         };
 
-        console.log("Token payload for signup:", tokenPayload); // Debugging: Log token payload
-        const token = signToken(tokenPayload); // Pass plain object
+        console.log("Token payload for signup:", tokenPayload);
+        const token = await signToken(tokenPayload);
         console.log("Token: ", token);
 
         const response = NextResponse.json(
             { message: "Authentication successful" },
             { status: 200 }
         );
-        serializeCookie(response, await token); // Set the cookie on the response
 
         return response;
     } catch (error) {
@@ -59,23 +55,21 @@ export const signupUser = async (
 
 export const loginUser = async (email: string, password: string) => {
     try {
-        await connectToDatabase(); // Ensure database connection
-        console.log("User model:", User); // Debugging: Log the User model
-
-        console.log("Login attempt with email:", email); // Debugging: Log email being queried
+        await connectToDatabase();
+        console.log("User model:", User);
+        console.log("Login attempt with email:", email);
         const user = await User.findOne({ email });
 
         if (!user) {
-            console.error("User not found for email:", email); // Debugging: Log if user is not found
+            console.error("User not found for email:", email);
             throw new Error("User has not registered yet");
         }
 
-        console.log("User found:", user); // Debugging: Log user data (excluding sensitive info)
-
-        const isMatch = await bcrypt.compare(password, user.password); // Compare plain text password with hashed password
-        console.log("Plain text password:", password); // Debugging: Log plain text password
-        console.log("Hashed password in DB:", user.password); // Debugging: Log hashed password
-        console.log("Password match result:", isMatch); // Debugging: Log password comparison result
+        console.log("User found:", user);
+        const isMatch = await bcrypt.compare(password, user.password);
+        console.log("Plain text password:", password);
+        console.log("Hashed password in DB:", user.password);
+        console.log("Password match result:", isMatch);
 
         if (!isMatch) {
             throw new Error("Invalid email or password");
@@ -87,14 +81,14 @@ export const loginUser = async (email: string, password: string) => {
             role: user.role,
         };
 
-        console.log("Token payload for login:", tokenPayload); // Debugging: Log token payload
-        const token = signToken(tokenPayload);
+        console.log("Token payload for login:", tokenPayload);
+        const token = await signToken(tokenPayload); // Generate token for logging/debug only
+        console.log("Token: ", token);
 
         const response = NextResponse.json(
             { message: "Authentication successful" },
             { status: 200 }
         );
-        serializeCookie(response, await token); // Set the cookie on the response
 
         return response;
     } catch (error) {
@@ -105,27 +99,3 @@ export const loginUser = async (email: string, password: string) => {
         throw new Error("Login failed");
     }
 };
-
-export function serializeCookie(res: NextResponse, token: string) {
-    const cookie = serialize("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60,
-    });
-
-    res.headers.append("Set-Cookie", cookie); // Use append to set the cookie
-    console.log("Setting cookie: ", cookie);
-}
-
-export async function logoutUser() {
-    await signOut({ redirect: false });
-    // Custom cookie clearing: remove the "token" cookie by setting a past expiry.
-    if (typeof window !== "undefined") {
-        document.cookie =
-            "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        console.log("Custom token cookie cleared.");
-    }
-    // ...additional custom cookie clearing if needed...
-}

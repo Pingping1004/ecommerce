@@ -15,27 +15,25 @@ export default function LoginPage() {
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-
-        console.log("Login form data:", form); // Debugging: Log form data
+        console.log("Login form data:", form); // Debugging: log form data
 
         if (!form.password) {
-            alert("Password is required"); // Ensure password is not empty
+            alert("Password is required");
             return;
         }
 
-        const res = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(form),
+        const result = await signIn("credentials", {
+            redirect: false,
+            email: form.email,
+            password: form.password,
+            callbackUrl: "/dashboard",
         });
 
-        if (!res.ok) {
-            const data = await res.json();
-            alert(data.error || "Login failed");
-            return;
+        if (result?.error) {
+            alert(result.error || "Login failed");
+        } else {
+            router.push(result?.url || "/dashboard");
         }
-
-        router.push("/dashboard"); // Redirect after successful login
     };
 
     const handleGoogleLogin = (event: React.MouseEvent<HTMLButtonElement>) => {

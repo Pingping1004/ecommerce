@@ -7,7 +7,6 @@ import {
     Dispatch,
     SetStateAction,
 } from "react";
-import axios from "axios";
 import { useSession } from "next-auth/react";
 
 export interface UserType {
@@ -25,31 +24,22 @@ export interface UserContextType {
 export const UserContext = createContext<UserContextType | null>(null);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user, setUser] = useState<UserType | null>(null);
     const { data: session, status } = useSession();
-    const token = session?.accessToken;
+    const [user, setUser] = useState<UserType | null>(null);
 
     useEffect(() => {
-        async function fetchUser() {
-            try {
-                const response = await axios.get("/api/user", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                const userData = response.data.user;
-                console.log("Fetched user data context: ", userData); // Debugging: Log fetched user data
-                setUser(userData);
-            } catch (error) {
-                console.error("Failed to fetch user context", error);
-            }
+        console.log("UserContext useEffect: session=", session, "status=", status);
+        if (status === "authenticated" && session?.user) {
+            setUser({
+                email: session.user.email ?? "",
+                username: session.user.username ?? "",
+                role: session.user.role ?? "",
+                image: session.user.image ?? undefined,
+            });
+        } else {
+            setUser(null);
         }
-        // Only fetch user if session is authenticated and token exists
-        if (status === "authenticated" && token) {
-            fetchUser();
-        }
-    }, [status, token]);
+    }, [session, status]);
 
     return (
         <UserContext.Provider value={{ user, setUser }}>

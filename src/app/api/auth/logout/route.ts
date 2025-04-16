@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { serialize } from "cookie";
 
 export async function POST() {
-    const response = NextResponse.json(
-        { message: "Logout successful" },
-        { status: 200 }
-    );
+    const response = NextResponse.json( { message: "Logout successful" }, { status: 200 });
 
     // Clear the next-auth session cookie
     const sessionCookie = serialize("next-auth.session-token", "", {
@@ -17,6 +14,7 @@ export async function POST() {
     });
 
     response.headers.append("Set-Cookie", sessionCookie);
+    response.cookies.set("next-auth.session-token", "", { maxAge: 0 });
     console.log("Clearing next-auth session cookie");
 
     return response;

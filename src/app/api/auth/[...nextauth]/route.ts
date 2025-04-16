@@ -80,7 +80,7 @@ export const authOptions: NextAuthOptions = {
 
                 return {
                     id: user._id.toString(),
-                    username: user.username,
+                    username: user.username, // Ensure this exists in DB
                     email: user.email,
                     role: user.role || "buyer",
                     image: user.image,
@@ -91,14 +91,15 @@ export const authOptions: NextAuthOptions = {
 
     callbacks: {
         async jwt({ token, user, account }) {
-            console.log("JWT Callback: ", { token, user, account });
+            console.log("JWT Callback:", { token, user, account });
+            // When a new user signs in, add additional fields
             if (user) {
-                token.role = user.role || "user";
-                token.username = user.username; // attach username as a separate field
-                token.user = user;
+                token.email = user.email;
+                token.username = user.username || (user?.email ? user.email.split("@")[0] : null); // fallback
+                token.role = user.role || "buyer";
+                token.id = user.id;
             }
-
-            // If OAuth login, manually generate a JWT and attach it to the token
+            // For OAuth logins, add accessToken if needed.
             if (account?.provider === "google") {
                 const secret = process.env.NEXTAUTH_SECRET || "";
                 const generatedToken = jwt.sign(
@@ -106,18 +107,17 @@ export const authOptions: NextAuthOptions = {
                     secret,
                     { expiresIn: "7d" }
                 );
-
                 token.accessToken = generatedToken;
                 token.provider = account.provider;
             }
             return token;
         },
         async session({ session, token }) {
-            console.log("Session Callback: ", { session, token });
+            console.log("Session Callback:", { session, token });
             if (session?.user) {
-                // Map token fields to session.user without overriding the object entirely
-                session.user.role = token.role as string | undefined;
-                session.user.username = token.username as string | undefined;
+                session.user.email = token.email as string;
+                session.user.username = token.username as string;
+                session.user.role = token.role as string;
                 session.accessToken = token.accessToken as string;
             }
             return session;
