@@ -168,21 +168,21 @@ export const authOptions: NextAuthOptions = {
             const parsedUrl = new URL(url, baseUrl);
             const tokenParam = parsedUrl.searchParams.get("token");
             if (tokenParam) {
-                return `${baseUrl}/dashboard?token=${tokenParam}`;
+                return `${baseUrl}/?token=${tokenParam}`;
             }
             if (url.includes("/api/auth/callback")) {
-                return `${baseUrl}/dashboard`;
+                return `${baseUrl}/`;
             }
             if (
                 url.startsWith(`${baseUrl}/login`) ||
                 url.startsWith(`${baseUrl}/signup`)
             ) {
-                return `${baseUrl}/dashboard`;
+                return `${baseUrl}/`;
             }
             if (url.startsWith(baseUrl)) {
                 return url;
             }
-            return `${baseUrl}/dashboard`;
+            return `${baseUrl}/`;
         },
     },
 

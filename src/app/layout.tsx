@@ -4,6 +4,7 @@ import "./globals.css";
 import ClientSessionWrapper from "./ClientSessionWrapper";
 import { UserProvider } from "@/context/UserContext";
 import { ProductProvider } from "@/context/ProductContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -28,7 +29,6 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
-
                 {/* Lato google font api connected */}
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link
@@ -43,12 +43,12 @@ export default function RootLayout({
 
                 {/* // Poppins google font api connected */}
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link 
+                <link
                     rel="preconnect"
                     href="https://fonts.gstatic.com"
                     crossOrigin="anonymous"
                 />
-                <link 
+                <link
                     href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
                     rel="stylesheet"
                 />
@@ -57,11 +57,13 @@ export default function RootLayout({
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
                 <ClientSessionWrapper>
-                    <UserProvider>
-                        <ProductProvider>
-                            {children}
-                        </ProductProvider>
-                    </UserProvider>
+                    <AuthProvider>
+                        <UserProvider>
+                            <ProductProvider>
+                                {children}
+                            </ProductProvider>
+                        </UserProvider>
+                    </AuthProvider>
                 </ClientSessionWrapper>
             </body>
         </html>

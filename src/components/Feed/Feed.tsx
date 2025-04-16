@@ -5,7 +5,7 @@ import UserContext, { UserContextType } from "@/context/UserContext";
 import ProductContext, { ProductContextType } from "@/context/ProductContext";
 import { AuthContext } from "@/context/AuthContext";
 
-export default function DashboardPage() {
+export default function FeedPage() {
     const userContext = useContext<UserContextType | null>(UserContext);
 
     if (!userContext) {

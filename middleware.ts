@@ -26,8 +26,8 @@ export default withAuth(async function middleware(req: NextRequestWithAuth) {
         userIsAuthenticated &&
         (pathname === "/login" || pathname === "/signup")
     ) {
-        console.log("User is authenticated, redirecting to /dashboard");
-        return NextResponse.redirect(new URL("/dashboard", req.url));
+        console.log("User is authenticated, redirecting to dynamic personal feed");
+        return NextResponse.redirect(new URL("/", req.url));
     }
 
     if (

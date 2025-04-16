@@ -1,8 +1,9 @@
 "use client";
 
-import { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
+import { AuthContext } from "./AuthContext";
 
 export interface ProductType {
     name: string;
@@ -24,15 +25,15 @@ export interface ProductContextType {
     setProducts: React.Dispatch<React.SetStateAction<ProductType[] | null>>;
 }
 
-export const ProductContext = createContext<ProductContextType | null>(null);
+const ProductContext = createContext<ProductContextType>({
+    products: null,
+    setProducts: () => {},
+});
 
-export const ProductProvider = ({
-    children,
-}: {
-    children: React.ReactNode;
-}) => {
-    const [products, setProducts] = useState<ProductType[] | null>([]);
-    const { data: session, status } = useSession();
+export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
+    const { isLoggedIn } = useContext(AuthContext);
+    const [products, setProducts] = useState<ProductType[] | null>(null);
+    const { data: session } = useSession();
     const token = session?.accessToken;
 
     useEffect(() => {
@@ -51,14 +52,21 @@ export const ProductProvider = ({
             }
         }
 
-        if (status === "authenticated" && token) {
+        if (isLoggedIn && token) {
             fetchProducts();
         }
-    }, [status, token]);
+    }, [isLoggedIn, token]);
 
     return (
-        <ProductContext.Provider value={{ products, setProducts }}>
+        <ProductContext.Provider
+            value={{
+                products, 
+                setProducts,
+            }}
+        >
             {children}
         </ProductContext.Provider>
     );
 };
+
+export default ProductContext;
