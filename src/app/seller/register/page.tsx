@@ -77,13 +77,13 @@ export default function SellerRegisterPage() {
 
     return (
         <>
-            <div className="container flex items-center mx-auto justify-center">
-                <div className="flex justify-center items-center w-full h-full xl:gap-14 lg:justify-normal md:gap-5 draggable">
-                    <div className="flex items-center justify-center w-full lg:p-12">
+            <div className="container min-h-screen flex items-center mx-auto justify-center py-10">
+                <div className="flex justify-center items-center w-full xl:gap-14 lg:justify-normal md:gap-5 draggable">
+                    <div className="flex items-center justify-center w-full px-12">
                         <div className="flex items-center xl:p-10">
                             <form
                                 onSubmit={handleSubmit}
-                                className="flex flex-col w-full h-full p-20 pb-6 text-center bg-white rounded-3xl"
+                                className="flex flex-col w-full p-20 max-sm:p-12 text-center bg-white rounded-3xl"
                             >
                                 <h3 className="mb-2 text-4xl poppins-bold text-gray-900">
                                     Seller Registration
@@ -97,7 +97,7 @@ export default function SellerRegisterPage() {
                                     <h4 className="flex justify-items-start mb-2 poppins-bold text-primary">
                                         Personal Information
                                     </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-2xl mb-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 p-6 rounded-2xl mb-4">
                                         {/* Business Email input */}
                                         <div className="mb-6">
                                             <label
@@ -112,7 +112,7 @@ export default function SellerRegisterPage() {
                                                 value={form.businessEmail}
                                                 onChange={handleChnage}
                                                 placeholder="Business Email"
-                                                className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
+                                                className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                                 required
                                             />
                                         </div>
@@ -131,7 +131,7 @@ export default function SellerRegisterPage() {
                                                 value={form.phone}
                                                 onChange={handleChnage}
                                                 placeholder="Phone"
-                                                className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
+                                                className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                                 required
                                             />
                                         </div>
@@ -150,7 +150,7 @@ export default function SellerRegisterPage() {
                                                 value={form.password}
                                                 onChange={handleChnage}
                                                 placeholder="Password"
-                                                className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
+                                                className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                                 required
                                             />
                                         </div>
@@ -169,7 +169,7 @@ export default function SellerRegisterPage() {
                                                 value={form.confirmPassword}
                                                 onChange={handleChnage}
                                                 placeholder="Confirm Password"
-                                                className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
+                                                className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                                 required
                                             />
                                         </div>
@@ -179,9 +179,9 @@ export default function SellerRegisterPage() {
                                 {/* Address Section */}
                                 <div>
                                     <h4 className="flex justify-items-start mb-2 poppins-bold text-primary">
-                                        Business Address
+                                        Address
                                     </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-2xl mb-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 p-6 rounded-2xl mb-4">
                                         {/* House number address input */}
                                         <div className="mb-6">
                                             <label className="flex mb-2 lato-regular text-start text-primary font-[500]">
@@ -193,7 +193,7 @@ export default function SellerRegisterPage() {
                                                 value={form.address.houseNumber}
                                                 onChange={handleChnage}
                                                 placeholder="House Number"
-                                                className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
+                                                className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                                 required
                                             />
                                         </div>
@@ -209,7 +209,7 @@ export default function SellerRegisterPage() {
                                                 value={form.address.street}
                                                 onChange={handleChnage}
                                                 placeholder="Street"
-                                                className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
+                                                className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                                 required
                                             />
                                         </div>
@@ -226,7 +226,7 @@ export default function SellerRegisterPage() {
                                                 value={form.address.district}
                                                 onChange={handleChnage}
                                                 placeholder="District"
-                                                className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
+                                                className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                                 required
                                             />
                                         </div>
@@ -241,7 +241,7 @@ export default function SellerRegisterPage() {
                                                 value={form.address.city}
                                                 onChange={handleChnage}
                                                 placeholder="City"
-                                                className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
+                                                className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                                 required
                                             />
                                         </div>
@@ -257,7 +257,7 @@ export default function SellerRegisterPage() {
                                                 value={form.address.country}
                                                 onChange={handleChnage}
                                                 placeholder="Country"
-                                                className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
+                                                className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                                 required
                                             />
                                         </div>
@@ -272,7 +272,7 @@ export default function SellerRegisterPage() {
                                                 value={form.address.zipCode}
                                                 onChange={handleChnage}
                                                 placeholder="Zip Code"
-                                                className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
+                                                className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                                 required
                                             />
                                         </div>
@@ -284,7 +284,7 @@ export default function SellerRegisterPage() {
                                     <h4 className="flex justify-items-start mb-2 poppins-bold text-primary">
                                         Shop Information
                                     </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-2xl mb-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 p-6 rounded-2xl mb-4">
                                         {/* Owner name input */}
                                         <div className="mb-6">
                                             <label className="flex mb-2 lato-regular text-start text-primary font-[500]">
@@ -296,7 +296,7 @@ export default function SellerRegisterPage() {
                                                 value={form.ownerName}
                                                 onChange={handleChnage}
                                                 placeholder="Owner name"
-                                                className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
+                                                className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                                 required
                                             />
                                         </div>
@@ -312,7 +312,7 @@ export default function SellerRegisterPage() {
                                                 value={form.shopname}
                                                 onChange={handleChnage}
                                                 placeholder="Shop name"
-                                                className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
+                                                className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                                 required
                                             />
                                         </div>
@@ -326,13 +326,19 @@ export default function SellerRegisterPage() {
                                                 name="businessType"
                                                 value={form.businessType}
                                                 onChange={handleChnage}
-                                                className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none mb-7 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
+                                                className="flex items-center w-full px-5 py-4 text-secondary text-md lato-regular outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl 
+                                                appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] 
+                                                bg-[length:0.7em] bg-[right_1.3em_center] bg-no-repeat pr-12"
                                                 required
                                             >
-                                                <option value="individual">
+                                                <option 
+                                                    value="individual"
+                                                >
                                                     Individual
                                                 </option>
-                                                <option value="company">
+                                                <option 
+                                                    value="company"
+                                                >
                                                     Company
                                                 </option>
                                             </select>
@@ -341,7 +347,7 @@ export default function SellerRegisterPage() {
                                 </div>
 
                                 <div className="flex justify-center">
-                                    <button className="w-full px-6 py-5 mb-10 text-sm font-bold leading-none text-white transition duration-500 md:w-96 rounded-2xl bg-gray-700 hover:bg-gray-800 hover:cursor-pointer focus:ring-4 focus:ring-purple-blue-100 bg-purple-blue-500">
+                                    <button className="w-full px-6 py-5 text-sm font-bold leading-none text-white transition duration-500 md:w-96 rounded-2xl bg-gray-700 hover:bg-gray-800 hover:cursor-pointer focus:ring-4 focus:ring-purple-blue-100 bg-purple-blue-500">
                                         Register as Seller
                                     </button>
                                 </div>
