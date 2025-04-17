@@ -5,7 +5,7 @@ import { connectToDatabase } from "@/lib/database";
 export async function getProducts() {
     try {
         await connectToDatabase();
-        const products = await Product.find({}).lean();
+        const products = await Product.find({});
         console.log("Fetched products: ", products);
         return products; // Return direct array instead of wrapping it
     } catch (error) {

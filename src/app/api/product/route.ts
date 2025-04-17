@@ -2,24 +2,19 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { addProduct, getProducts } from "@/features/products/productService";
+import { verifyToken } from "@/lib/jwt";
+import checkToken from "@/util/checkToken";
 
 export const runtime = "nodejs"; // Ensure the API route uses the Node.js runtime
 
 export async function GET(req: NextRequest) {
     try {
-        const authHeader = req.headers.get("Authorization");
-        console.log("Auth header received:", authHeader);
-
-        if (!authHeader?.startsWith("Bearer ")) {
-            return NextResponse.json(
-                { error: "No token provided" },
-                { status: 401 }
-            );
-        }
+        checkToken(req); // Verify token using the utility function
 
         const products = await getProducts();
         console.log("Products being sent:", products); // Debug log
         return NextResponse.json(products); // Send array directly
+
     } catch (error) {
         console.error("Product fetch error:", error);
         return NextResponse.json(
@@ -43,26 +38,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const authHeader = req.headers.get("Authorization");
-        console.log("Auth header received:", authHeader);
-
-        if (!authHeader?.startsWith("Bearer ")) {
-            return NextResponse.json(
-                { error: "No token provided" },
-                { status: 401 }
-            );
-        }
-
-        const token = authHeader.split(" ")[1];
-        const session = await getServerSession(authOptions);
-
-        if (!token && !session) {
-            console.error("Unauthorized access attempt");
-            return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 }
-            );
-        }
+        checkToken(req);
 
         const response = await addProduct(newProduct);
         return response;

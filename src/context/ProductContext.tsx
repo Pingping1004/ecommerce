@@ -64,23 +64,23 @@ export const ProductProvider = ({
                 },
             });
 
-            const data = response.data;
+            const productData = response.data;
 
-            console.log("Product context fetching:", data); // Debug log
+            console.log("Product context fetching:", productData); // Debug log
 
             // Case 1: Direct array
-            if (Array.isArray(data)) {
+            if (Array.isArray(productData)) {
                 console.log("Direct array format detected");
-                setProducts(data);
+                setProducts(productData);
             }
             // Case 2: Nested array in products property
-            else if (Array.isArray(data.products)) {
-                console.log("Nested array format detected");
-                setProducts(data.products);
-            }
+            // else if (Array.isArray(productData.products)) {
+            //     console.log("Nested array format detected");
+            //     setProducts(productData.products);
+            // }
             // Case 3: Invalid format
             else {
-                console.error("Invalid format received:", typeof data, data);
+                console.error("Invalid format received:", typeof productData, productData);
                 setError("Invalid data format received");
             }
         } catch (error: any) {

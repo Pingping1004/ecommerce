@@ -1,7 +1,5 @@
 "use client";
 
-import React, { useContext } from "react";
-
 // Conditional page rendering based on authentication status
 import FeedPage from "@/components/Feed/Feed";
 import PublicFeed from "@/components/Feed/Public";
