@@ -61,7 +61,16 @@ body {
 
 .text-secondary {
   color: #1E1E1E;
+  opacity: 0.75;
+}
+
+.text-tertiary {
+  color: #1E1E1E;
   opacity: 0.5;
+}
+.text-quaternary {
+  color: #1E1E1E;
+  opacity: 0.25;
 }
 
 .poppins-thin {

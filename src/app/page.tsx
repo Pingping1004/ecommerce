@@ -5,8 +5,10 @@ import FeedPage from "@/components/Feed/Feed";
 import PublicFeed from "@/components/Feed/Public";
 
 // Context
-import { useAuth } from "@/context/AuthContext";
 import { useProductContext } from "@/context/ProductContext";
+
+//Hooks
+import { useAuth } from "@/hooks/useAuth";
 
 export default function HomePage() {
     const { isLoggedIn, isLoading, logout } = useAuth();

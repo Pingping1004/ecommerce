@@ -2,7 +2,7 @@
 
 import { useProductContext } from "@/context/ProductContext";
 import UserContext from "@/context/UserContext";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useContext } from "react";
 
 export default function Feed() {

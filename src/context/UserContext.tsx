@@ -9,7 +9,7 @@ import {
     SetStateAction,
 } from "react";
 import { useSession } from "next-auth/react";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface UserType {
     email: string;
