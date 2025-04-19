@@ -1,13 +1,11 @@
-import { getSeller, registerSeller } from "@/features/seller/registerService";
+import { getSeller, registerSeller, updateSellerStatus } from "@/features/seller/sellerService";
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/database";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
     try {
-        await connectToDatabase();
         const sellerData = await req.json();
 
         const result = await registerSeller(req, sellerData);
@@ -32,9 +30,8 @@ export async function POST(req: NextRequest) {
     }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
-        await connectToDatabase();
         const sellers = await getSeller();
         return NextResponse.json({ success: true, data: sellers });
     } catch (error: any) {
@@ -42,5 +39,21 @@ export async function GET(req: NextRequest) {
             { success: false, message: error.message },
             { status: 500 }
         );
+    }
+}
+
+export async function PATCH(req: NextRequest) {
+    try {
+        const data = await req.json();
+        const { userId, status } = data;
+
+        console.log('userId in update seller state: ', userId);
+        console.log('Seller status in update seller state: ', status);
+
+        const seller = await updateSellerStatus(status, userId);
+
+        return NextResponse.json(seller, { status: 201 });
+    } catch (error: any) {
+        return NextResponse.json({ message: error.message}, { status: 500 })
     }
 }

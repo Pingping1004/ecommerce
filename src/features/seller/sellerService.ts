@@ -77,3 +77,33 @@ export const getSeller = async () => {
         throw new Error("Get all sellers failed");
     }
 };
+
+export const findSeller = async (userId: string) => {
+    try {
+        await connectToDatabase();
+
+        const seller = await Seller.findOne({ userId });
+        console.log('Finding seller: ', seller);
+
+        return seller;
+    } catch (error) {
+        console.error('Failed to find seller: ', error);
+        throw new Error('Failed to find seller');
+    }
+}
+
+export const updateSellerStatus = async (status: string, userId: string) => {
+    try {
+        await connectToDatabase();
+
+        const updatedSeller = await findSeller(userId);
+        updatedSeller.status = status;
+        await updatedSeller.save();
+        console.log('Updaing seller ', updatedSeller.ownerName, " to status: ", updatedSeller.status);
+
+        return updatedSeller;
+    } catch (error) {
+        console.error('Failed to update seller status: ', error);
+        throw new Error('Failed to update seller status');
+    }
+}
