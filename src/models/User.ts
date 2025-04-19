@@ -28,6 +28,7 @@ UserSchema.pre<UserType>("save", async function (next) {
     if (!this.username && this.email) {
         this.username = this.email.split("@")[0];
     }
+    
     next();
 });
 

@@ -36,11 +36,11 @@ export default function SignupPage() {
             return;
         }
 
-        router.push("/dashboard"); // Redirect after successful signup
+        router.push("/"); // Redirect after successful signup
     };
 
     const handleGoogleSignup = () => {
-        signIn("google", { callbackUrl: "/dashboard" });
+        signIn("google", { callbackUrl: "/" });
     };
 
     return (

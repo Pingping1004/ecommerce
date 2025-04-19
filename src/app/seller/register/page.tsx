@@ -14,7 +14,7 @@ interface Address {
     zipCode: string;
 }
 
-interface BankAccount {
+export interface BankAccountFormData {
     accountName: string;
     accountNumber: string;
     bankName: "KBANK" | "SCB" | "BBL";
@@ -23,8 +23,6 @@ interface BankAccount {
 export interface SellerFormData {
     // Personal info
     businessEmail: string;
-    password: string;
-    confirmPassword: string;
     phone: string;
     // Address info
     address: Address;
@@ -32,6 +30,8 @@ export interface SellerFormData {
     ownerName: string;
     shopName: string;
     businessType: "individual" | "company";
+    bankAccount: BankAccountFormData;
+    status: "pending" | "approved" | "rejected" | "suspended";
 }
 
 export default function SellerRegisterPage() {
@@ -52,12 +52,13 @@ export default function SellerRegisterPage() {
         },
         phone: "",
         ownerName: "",
-        shopname: "",
+        shopName: "", // Fixed: changed from shopname to shopName to match the schema
         businessType: "individual",
+        status: "pending",
     });
 
     const [isFlipped, setIsFlipped] = useState(false);
-    const [bankForm, setBankForm] = useState<BankAccount>({
+    const [bankForm, setBankForm] = useState<BankAccountFormData>({
         accountName: "",
         accountNumber: "",
         bankName: "KBANK",
@@ -92,7 +93,7 @@ export default function SellerRegisterPage() {
         }));
     };
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         if (!isLoggedIn) {
@@ -100,8 +101,8 @@ export default function SellerRegisterPage() {
             return;
         }
 
-        if (form.password !== form.confirmPassword) {
-            alert("passwords do not match");
+        if (!session?.user?.id) {
+            alert("User session not found. Please login again.");
             return;
         }
 
@@ -111,18 +112,23 @@ export default function SellerRegisterPage() {
                 bankAccount: bankForm,
             };
 
-            const response = axios.post("/api/seller/register", {
-                headers: {
-                    Authorization: `Bearer ${session?.accessToken}`,
-                },
-                body: completeForm,
-            });
+            const response = await axios.post(
+                "/api/seller/register",
+                completeForm,
+                {
+                    headers: {
+                        Authorization: `Bearer ${session?.accessToken}`,
+                    },
+                }
+            );
 
-            const sellerData = (await response).data;
-            console.log("Register form is submit!");
-            console.log("Seller data:", sellerData); // Debug log
+            if (response.status === 201) {
+                alert("Successfully registered as a seller!");
+                // You might want to redirect the user or update the UI here
+            }
         } catch (error) {
             console.error("Failed to register as seller: ", error);
+            alert("Failed to register as seller. Please try again.");
         }
     };
 
@@ -131,17 +137,17 @@ export default function SellerRegisterPage() {
     };
 
     return (
-        <div className="container flex items-center mx-auto justify-center max-md:py-10">
-            <div className="flip-container flex justify-center w-full xl:gap-14 lg:justify-normal md:gap-5 max-w-4xl perspective-1000">
-                <div
-                    className={`flipper relative w-full min-h-screen transition-transform duration-1000 preserve-3d ${
-                        isFlipped ? "rotate-y-180" : ""
-                    }`}
-                >
-                    {/* Front Side - Main Form */}
-                    <div className="flex front absolute w-full my-auto backface-hidden">
-                        <div className="flex justify-center items-center w-full px-12">
-                            <div className="flex items-center xl:p-10">
+        <div className="min-h-screen w-full overflow-auto">
+            <div className="container mx-auto h-full flex items-center justify-center">
+                <div className="w-full max-w-4xl py-10">
+                    <div
+                        className={`flipper relative w-full transition-transform duration-1000 preserve-3d ${
+                            isFlipped ? "rotate-y-180" : ""
+                        }`}
+                    >
+                        {/* Front Side - Main Form */}
+                        <div className="front absolute w-full backface-hidden">
+                            <div className="w-full px-12">
                                 <form
                                     onSubmit={handleSubmit}
                                     className="flex flex-col w-full p-20 py-12 max-sm:p-12 text-center bg-white rounded-3xl"
@@ -192,44 +198,6 @@ export default function SellerRegisterPage() {
                                                     value={form.phone}
                                                     onChange={handleChange}
                                                     placeholder="08X-XXX-XXXX"
-                                                    className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none max-md:mb-3 lg:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
-                                                    required
-                                                />
-                                            </div>
-
-                                            {/* Password input */}
-                                            <div className="mb-6 lg:mb-6 max-md:mb-3 max-sm:mb-2">
-                                                <label
-                                                    htmlFor="password"
-                                                    className="flex mb-3 lato-regular text-start text-primary font-[500]"
-                                                >
-                                                    Password
-                                                </label>
-                                                <input
-                                                    type="password"
-                                                    name="password"
-                                                    value={form.password}
-                                                    onChange={handleChange}
-                                                    placeholder="Password"
-                                                    className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none max-md:mb-3 lg:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
-                                                    required
-                                                />
-                                            </div>
-
-                                            {/* Confirm Password input */}
-                                            <div className="mb-6 lg:mb-6 max-md:mb-3 max-sm:mb-2">
-                                                <label
-                                                    htmlFor="confirmPassword"
-                                                    className="flex mb-3 lato-regular text-start text-primary font-[500]"
-                                                >
-                                                    Confirm Password
-                                                </label>
-                                                <input
-                                                    type="password"
-                                                    name="confirmPassword"
-                                                    value={form.confirmPassword}
-                                                    onChange={handleChange}
-                                                    placeholder="Confirm Password"
                                                     className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none max-md:mb-3 lg:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
                                                     required
                                                 />
@@ -373,8 +341,8 @@ export default function SellerRegisterPage() {
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    name="shopname"
-                                                    value={form.shopname}
+                                                    name="shopName"
+                                                    value={form.shopName}
                                                     onChange={handleChange}
                                                     placeholder="My Awesome Shop"
                                                     className="flex items-center w-full px-5 py-4 text-sm font-medium outline-none max-md:mb-3 lg:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl"
@@ -392,7 +360,7 @@ export default function SellerRegisterPage() {
                                                     value={form.businessType}
                                                     onChange={handleChange}
                                                     className="flex items-center w-full px-5 py-4 text-secondary text-md lato-regular outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl 
-                                                    appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] 
+                                                    appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] 
                                                     bg-[length:0.7em] bg-[right_1.3em_center] bg-no-repeat pr-12"
                                                     required
                                                 >
@@ -419,17 +387,15 @@ export default function SellerRegisterPage() {
                                 </form>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Back Side - Bank Account Form */}
-                    <div className="flex back absolute w-full h-full backface-hidden rotate-y-180">
-                        <div className="flex items-center justify-center w-full px-12">
-                            <div className="flex items-center xl:p-10 w-full">
-                                <form className="flex flex-col w-full h-full bg-white p-12 py-12 max-sm:p-12 text-center rounded-3xl">
+                        {/* Back Side - Bank Account Form */}
+                        <div className="back absolute w-full backface-hidden rotate-y-180">
+                            <div className="w-full px-12">
+                                <form className="flex flex-col w-full bg-white p-12 py-12 max-sm:p-12 text-center rounded-3xl">
                                     <h3 className="mb-2 text-4xl poppins-bold text-gray-900">
                                         Bank Account Details
                                     </h3>
-                                    <p className="mb-16 text-secondary lato-bold">
+                                    <p className="mb-16 max-sm:mb-8 text-secondary lato-bold">
                                         Enter your bank account information
                                     </p>
 
@@ -472,23 +438,32 @@ export default function SellerRegisterPage() {
                                                 Bank
                                             </label>
                                             <select
-                                                name="businessType"
+                                                name="bankName"
                                                 value={bankForm.bankName}
                                                 onChange={handleBankFormChange}
-                                                className="flex items-center w-full px-5 py-4 text-secondary text-md lato-regular outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl 
-                                                    appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] 
+                                                className="flex items-center w-full px-5 py-4 text-sm text-secondary max-w-[480px]:text-sm lato-regular outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl 
+                                                    appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] 
                                                     bg-[length:0.7em] bg-[right_1.3em_center] bg-no-repeat pr-12"
                                                 required
                                             >
-                                                <option value="KBANK">
+                                                <option
+                                                    value="KBANK"
+                                                    className="text-md max-w-[480px]:text-sm"
+                                                >
                                                     Kasikorn Bank (KBANK)
                                                 </option>
 
-                                                <option value="SCB">
+                                                <option
+                                                    value="SCB"
+                                                    className="text-md max-w-[480px]:text-sm"
+                                                >
                                                     Siam Commercial Bank (SCB)
                                                 </option>
 
-                                                <option value="BBL">
+                                                <option
+                                                    value="BBL"
+                                                    className="text-md max-w-[480px]:text-sm"
+                                                >
                                                     Bangkok Bank (BBL)
                                                 </option>
                                             </select>

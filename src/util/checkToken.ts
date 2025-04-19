@@ -1,21 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { NextRequest } from "next/server";
+import { verifyToken } from "@/lib/jwt";
 
-export default async function checkToken(req: NextRequest) {
-    const authHeader = req.headers.get("Authorization");
-    const session = await getServerSession(authOptions);
-    console.log("Auth header received:", authHeader);
-
-    if (!authHeader?.startsWith("Bearer ")) {
-        throw new Error("No token provided");
+export default function checkToken(req: NextRequest) {
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        throw new Error("Missing or invalid authorization header");
     }
 
     const token = authHeader.split(" ")[1];
-    if (!token && !session) {
-        console.error("Unauthorized access attempt");
-        throw new Error("Unauthorized access attempt");
+    try {
+        // Decode the token using the same secret used to sign it
+        const decoded = verifyToken(token);
+        return decoded;
+    } catch (error) {
+        throw new Error("Invalid token");
     }
-
-    return token;
 }

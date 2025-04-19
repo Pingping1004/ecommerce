@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { User } from './User';
+import User from './User';
 
 export interface ProductType extends Document {
-    user: User,
+    user: typeof User,
     name: string;
     description?: string;
     price: number;
@@ -42,5 +42,3 @@ const ProductSchema = new Schema<ProductType>(
 )
 
 export default mongoose.models.Product || mongoose.model<ProductType>('Product', ProductSchema);
-
-// export default mongoose.model<Product>("Product", ProductSchema);

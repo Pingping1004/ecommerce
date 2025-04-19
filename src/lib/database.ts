@@ -1,46 +1,38 @@
 import mongoose from "mongoose";
 
-// Load Mongo URI and options
-const uri: string = process.env.MONGODB_URI || '';
-const options: mongoose.ConnectOptions = {
-    tls: true,
-};
+const MONGODB_URI = process.env.MONGODB_URI!;
 
-// Caching the Mongoose connection in development mode
-interface MongooseCache {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
-}
-
-declare global {
-  var _mongoose: MongooseCache | undefined;
-}
-
-let cached: MongooseCache = global._mongoose || { conn: null, promise: null };
-
-if (!uri) {
-  throw new Error('Please add your Mongo URI to .env.local');
+if (!MONGODB_URI) {
+    throw new Error(
+        "Please define the MONGODB_URI environment variable inside .env"
+    );
 }
 
 export async function connectToDatabase() {
-  try {
-    // Return cached connection if already available
-    if (cached.conn) {
-      return cached.conn;
-    }
+    try {
+        const opts = {
+            bufferCommands: true,
+        };
 
-    // Use cached promise if available, otherwise create a new one
-    if (!cached.promise) {
-      cached.promise = mongoose
-        .connect(uri, { ...options, dbName: 'project' })
-        .then((mongooseInstance) => mongooseInstance);
-    }
+        if (mongoose.connection.readyState === 0) {
+            await mongoose.connect(MONGODB_URI, opts);
+            console.log("MongoDB connected successfully");
 
-    cached.conn = await cached.promise;
-    console.log('Database is connected');
-    return cached.conn;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Database connection failed");
-  }
+            // Ensure collections exist
+            const db = mongoose.connection.db;
+            if (!db) {
+                throw new Error("mongoose.connection.db is undefined.");
+            }
+            const collections = await db.listCollections().toArray();
+            const collectionNames = collections.map((col) => col.name);
+
+            if (!collectionNames.includes("sellers")) {
+                await db.createCollection("sellers");
+                console.log("Sellers collection created");
+            }
+        }
+    } catch (error) {
+        console.error("MongoDB connection error:", error);
+        throw error;
+    }
 }
