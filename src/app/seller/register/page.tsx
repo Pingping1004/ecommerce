@@ -4,6 +4,7 @@ import React, { FormEvent, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface Address {
     houseNumber: string;
@@ -37,6 +38,7 @@ export interface SellerFormData {
 export default function SellerRegisterPage() {
     const { isLoggedIn } = useAuth();
     const { data: session } = useSession();
+    const router = useRouter();
 
     const [form, setForm] = useState({
         businessEmail: "",
@@ -112,23 +114,34 @@ export default function SellerRegisterPage() {
                 bankAccount: bankForm,
             };
 
+            console.log("Submitting form data:", completeForm);
+
             const response = await axios.post(
                 "/api/seller/register",
                 completeForm,
                 {
                     headers: {
+                        "Content-Type": "application/json",
                         Authorization: `Bearer ${session?.accessToken}`,
                     },
                 }
             );
 
+            console.log("Server response:", response.data);
+
             if (response.status === 201) {
                 alert("Successfully registered as a seller!");
-                // You might want to redirect the user or update the UI here
+                window.location.href = "/"; // Redirect to home page
             }
-        } catch (error) {
-            console.error("Failed to register as seller: ", error);
-            alert("Failed to register as seller. Please try again.");
+        } catch (error: any) {
+            console.error(
+                "Failed to register as seller:",
+                error.response?.data || error
+            );
+            alert(
+                error.response?.data?.message ||
+                    "Failed to register as seller. Please try again."
+            );
         }
     };
 
@@ -148,10 +161,7 @@ export default function SellerRegisterPage() {
                         {/* Front Side - Main Form */}
                         <div className="front absolute w-full backface-hidden">
                             <div className="w-full px-12">
-                                <form
-                                    onSubmit={handleSubmit}
-                                    className="flex flex-col w-full p-20 py-12 max-sm:p-12 text-center bg-white rounded-3xl"
-                                >
+                                <form className="flex flex-col w-full p-20 py-12 max-sm:p-12 text-center bg-white rounded-3xl">
                                     <h3 className="mb-2 text-4xl poppins-bold text-gray-900">
                                         Seller Registration
                                     </h3>
@@ -391,7 +401,10 @@ export default function SellerRegisterPage() {
                         {/* Back Side - Bank Account Form */}
                         <div className="back absolute w-full backface-hidden rotate-y-180">
                             <div className="w-full px-12">
-                                <form className="flex flex-col w-full bg-white p-12 py-12 max-sm:p-12 text-center rounded-3xl">
+                                <form
+                                    onSubmit={handleSubmit}
+                                    className="flex flex-col w-full bg-white p-12 py-12 max-sm:p-12 text-center rounded-3xl"
+                                >
                                     <h3 className="mb-2 text-4xl poppins-bold text-gray-900">
                                         Bank Account Details
                                     </h3>
@@ -441,9 +454,7 @@ export default function SellerRegisterPage() {
                                                 name="bankName"
                                                 value={bankForm.bankName}
                                                 onChange={handleBankFormChange}
-                                                className="flex items-center w-full px-5 py-4 text-sm text-secondary max-w-[480px]:text-sm lato-regular outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl 
-                                                    appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] 
-                                                    bg-[length:0.7em] bg-[right_1.3em_center] bg-no-repeat pr-12"
+                                                className="flex items-center w-full px-5 py-4 text-sm text-secondary max-w-[480px]:text-sm lato-regular outline-none mb-6 max-sm:mb-4 placeholder:text-gray-400 bg-gray-100 text-gray-900 rounded-2xl pr-12"
                                                 required
                                             >
                                                 <option

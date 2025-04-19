@@ -10,63 +10,53 @@ import User from "@/models/User";
 import { NextRequest } from "next/server";
 
 export const registerSeller = async (req: NextRequest, sellerFormData: SellerFormData) => {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-    if (!token) throw new Error("Please login first");
-
-    await connectToDatabase();
-
-    const user = await User.findOne({ email: token.email });
-    if (!user) throw new Error("User not found");
-
-    const existingSeller = await Seller.findOne({ userId: user._id });
-    if (existingSeller) throw new Error("User already register as seller");
-
-    if (!sellerFormData.businessEmail || !sellerFormData.phone || !sellerFormData.ownerName || 
-        !sellerFormData.shopName || !sellerFormData.address || !sellerFormData.bankAccount) {
-        throw new Error("All required fields must be completed");
-    }
-
-    const newSeller = new Seller({
-        userId: user._id, // This will be the foreign key reference to User collection
-        businessEmail: sellerFormData.businessEmail,
-        phone: sellerFormData.phone,
-        address: {
-            houseNumber: sellerFormData.address.houseNumber,
-            street: sellerFormData.address.street,
-            district: sellerFormData.address.district,
-            city: sellerFormData.address.city,
-            country: sellerFormData.address.country,
-            zipCode: sellerFormData.address.zipCode,
-        },
-        ownerName: sellerFormData.ownerName,
-        shopName: sellerFormData.shopName,
-        businessType: sellerFormData.businessType || "individual",
-        bankAccount: {
-            accountName: sellerFormData.bankAccount.accountName,
-            accountNumber: sellerFormData.bankAccount.accountNumber,
-            bankName: sellerFormData.bankAccount.bankName || "KBANK",
-        },
-        status: "pending",
-    });
-
-    const dbSession = await mongoose.startSession();
-    dbSession.startTransaction();
-
+    let dbSession;
     try {
+        const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+        if (!token) throw new Error("Please login first");
+
+        await connectToDatabase();
+        console.log("Connected to database");
+
+        const user = await User.findOne({ email: token.email });
+        if (!user) throw new Error("User not found");
+
+        // Validate required fields
+        if (!sellerFormData.businessEmail || !sellerFormData.shopName || 
+            !sellerFormData.bankAccount?.accountNumber) {
+            throw new Error("Missing required fields");
+        }
+
+        dbSession = await mongoose.startSession();
+        dbSession.startTransaction();
+
+        const newSeller = new Seller({
+            userId: user._id,
+            ...sellerFormData,
+            status: "pending"
+        });
+
+        console.log("Attempting to save seller:", newSeller);
         await newSeller.save({ session: dbSession });
-        user.role = 'seller';
+
+        user.role = "seller";
+        console.log('User who register as seller: ', "name: ", user.username, "role: ", user.role);
         await user.save({ session: dbSession });
+
         await dbSession.commitTransaction();
-        console.log('Creating new seller: ', newSeller);
-        console.log('User who register as seller: ', user);
+        console.log("Seller registration successful");
         
         return newSeller;
-    } catch (error) {
-        await dbSession.abortTransaction();
-        console.error('Seller registration failed:', error);
-        throw new Error("Failed to register as seller. Please try again.");
+    } catch (error: any) {
+        console.error("Register seller error:", error);
+        if (dbSession) {
+            await dbSession.abortTransaction();
+        }
+        throw error;
     } finally {
-        dbSession.endSession();
+        if (dbSession) {
+            await dbSession.endSession();
+        }
     }
 };
 
