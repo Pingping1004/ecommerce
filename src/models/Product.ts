@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 import User from './User';
 
 export interface ProductType extends Document {
-    user: typeof User,
+    ownerId: typeof User,
     name: string;
     description?: string;
     price: number;
@@ -19,7 +19,7 @@ export interface ProductType extends Document {
 
 const ProductSchema = new Schema<ProductType>(
     {
-        user: { type: Schema.Types.ObjectId, ref: 'User' },
+        ownerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         name: { type: String, required: true },
         description: { type: String },
         price: { type: Number, required: true },
@@ -40,5 +40,10 @@ const ProductSchema = new Schema<ProductType>(
     },
     { timestamps: true, collection: 'Products' }
 )
+
+ProductSchema.index({ name: 'text' });
+ProductSchema.index({ price: 1 });
+ProductSchema.index({ name: 1, category: 1 });
+ProductSchema.index({ price: 1, category: 1 });
 
 export default mongoose.models.Product || mongoose.model<ProductType>('Product', ProductSchema);

@@ -1,4 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
+import Product from "./Product";
+import Seller from "./Seller";
 
 export interface UserType extends Document {
     email: string;
@@ -30,6 +32,24 @@ UserSchema.pre<UserType>("save", async function (next) {
     }
     
     next();
+});
+
+UserSchema.pre<UserType>('deleteOne',  { document: true, query: false }, async function (next) {
+    try {
+        await Product.deleteMany({ ownerId: this._id });
+        next();
+    } catch (error: any) {
+        next(error);
+    }
+});
+
+UserSchema.pre<UserType>('deleteOne', { document: true, query: false }, async function (next) {
+    try {
+        await Seller.deleteOne({ userId: this._id });
+        next();
+    } catch (error: any) {
+        next(error);
+    }
 });
 
 export default mongoose.models?.["User"] ||
