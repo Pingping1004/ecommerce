@@ -4,6 +4,7 @@ import { useProductContext } from "@/context/ProductContext";
 import UserContext from "@/context/UserContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useContext } from "react";
+import PaggeLoading from "../handling/Loading";
 
 export default function Feed() {
     const { products, isLoading, error, refetchProducts } = useProductContext();
@@ -11,7 +12,11 @@ export default function Feed() {
     const { logout } = useAuth();
 
     if (isLoading) {
-        return <div>Loading products...</div>;
+        return (
+            <>
+                <PaggeLoading />
+            </>
+        )
     }
 
     if (error) {

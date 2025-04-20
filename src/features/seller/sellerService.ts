@@ -78,7 +78,7 @@ export const getSeller = async () => {
     }
 };
 
-export const findSeller = async (userId: string) => {
+export const getSellerById = async (userId: string) => {
     try {
         await connectToDatabase();
 
@@ -96,7 +96,7 @@ export const updateSellerStatus = async (status: string, userId: string) => {
     try {
         await connectToDatabase();
 
-        const updatedSeller = await findSeller(userId);
+        const updatedSeller = await getSellerById(userId);
         updatedSeller.status = status;
         await updatedSeller.save();
         console.log('Updaing seller ', updatedSeller.ownerName, " to status: ", updatedSeller.status);

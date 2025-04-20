@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useState, ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import axios from "axios";
 import { useSession } from "next-auth/react";
