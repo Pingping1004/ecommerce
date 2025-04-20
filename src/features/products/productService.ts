@@ -29,8 +29,11 @@ export async function addProduct(productData: ProductType) {
         if (!productData) throw new Error("Product data is required");
         if (!productData.ownerId) throw new Error("ownerId is missing");
 
-        console.log('Receiving productData: ', productData);
-        const product = new Product(productData);
+        console.log("Receiving productData: ", productData);
+        const product = new Product({
+            ...productData,
+            ownerId: new mongoose.Types.ObjectId(productData.ownerId),
+        });
 
         await product.save();
         console.log("Added product in service: ", product);
@@ -83,6 +86,40 @@ export async function updateProduct(
     }
 }
 
+export async function deleteProduct(
+    userId: string,
+    productIds: string | string[]
+) {
+    let deletedCount = 0;
+    try {
+        await connectToDatabase();
+
+        if (!productIds || (Array.isArray(productIds) && productIds.length === 0)) {
+            throw new Error("No product ID(s) provided");
+        }
+
+        const ids = Array.isArray(productIds) ? productIds : [productIds];
+        
+
+        for (const id of ids) {
+            try {
+                const product = await findProductById(id, userId);
+                await product.deleteOne({ _id: id, ownerId: userId });
+                console.log(`Deleted product ${id}`);
+                deletedCount ++;
+            } catch (error: any) {
+                console.warn(`Skipped product ${id}:`, error.message);
+                // Optionally collect skipped products
+            }
+        }
+
+        return deletedCount;
+    } catch (error: any) {
+        console.error("Failed to delete product(s): ", error);
+        throw new Error("Failed to delete product(s)");
+    }
+}
+
 // Helper function to check product ownership
 export async function isOwnerOfProduct(userId: string, productId: string) {
     const product = await findProductById(productId);
@@ -91,12 +128,20 @@ export async function isOwnerOfProduct(userId: string, productId: string) {
     console.log("User ID:", userId);
     console.log("Product Owner ID:", product.ownerId);
 
-    return product.ownerId.toString() === userId;
+    if (product.ownerId.toString() !== userId)
+        return new Error("You are not the owner of product");
 }
 
-export async function findProductById(productId: string) {
+export async function findProductById(productId: string, userId?: string) {
     try {
-        const product = await Product.findById(productId);
+        const query = userId
+            ? { _id: productId, ownerId: new mongoose.Types.ObjectId(userId) }
+            : { _id: productId };
+
+        console.log("Querying with productId:", productId);
+        console.log("Querying with owner ID:", userId, typeof userId);
+
+        const product = await Product.findOne(query);
         console.log("Find product by ID: ", product);
 
         if (!product) throw new Error("No product found by ID");

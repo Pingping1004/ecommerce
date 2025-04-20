@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/route";
 import {
     addProduct,
+    deleteProduct,
     getProducts,
     updateProduct,
 } from "@/features/products/productService";
@@ -98,6 +99,29 @@ export async function PATCH(req: NextRequest) {
                 success: false,
                 error: error.message || "Failed to update product",
             },
+            { status: 500 }
+        );
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    try {
+        checkToken(req);
+
+        const data = await req.json();
+        let { userId, productIds } = data;
+        productIds = data.productIds ?? data.productId;
+
+        const deletedCount = await deleteProduct(userId, productIds);
+
+        console.log(`Deleted ${deletedCount} products in API`);
+        console.log('Deleted productIds: ', productIds);
+
+        return NextResponse.json({ message: `Deleted ${deletedCount} products` }, { status: 200 });
+    } catch (error: any) {
+        console.error("Error removing product: ", error.message);
+        return NextResponse.json(
+            { error: "Failed to remove product" },
             { status: 500 }
         );
     }
