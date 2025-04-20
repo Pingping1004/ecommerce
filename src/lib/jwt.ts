@@ -1,4 +1,7 @@
-import { SignJWT, jwtVerify, JWTPayload } from "jose";
+import { SignJWT, JWTPayload } from "jose";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { NextResponse } from "next/server";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -13,10 +16,18 @@ export const signToken = async (payload: JWTPayload) => {
         .sign(SECRET_KEY);
 };
 
-export const verifyToken = async (token: string) => {
+export const verifyToken = async () => {
     try {
-        const { payload } = await jwtVerify(token, SECRET_KEY);
-        return payload;
+        const session = await getServerSession(authOptions);
+        
+        if (!session || !session.user) {
+            return NextResponse.json('Unauthorized', { status: 401 });
+        }
+
+        return NextResponse.json({
+            message: 'Authorized session',
+            user: session.user,
+        })
     } catch (error) {
         console.error("Token verification failed:", error);
         throw new Error("Invalid token");

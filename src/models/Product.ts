@@ -1,8 +1,8 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 import User from './User';
 
 export interface ProductType extends Document {
-    ownerId: typeof User,
+    ownerId: Types.ObjectId | string,
     name: string;
     description?: string;
     price: number;

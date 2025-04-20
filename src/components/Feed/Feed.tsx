@@ -47,6 +47,8 @@ export default function Feed() {
                     <p className="text-lg font-semibold mt-2">
                         ${product.price}
                     </p>
+                    <p className="text-white">productId: {product._id}</p>
+                    {/* <p className="text-white">{product.ownerId}</p> */}
                     <p className="text-sm text-gray-500">
                         Category: {product.category}
                     </p>
