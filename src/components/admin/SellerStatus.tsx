@@ -6,47 +6,47 @@ import axios from "axios";
 import PaggeLoading from "../handling/Loading";
 
 export default function AdminTable() {
-    const { sellers, setSellers, isLoading, error } = useContext(SellerContext)!;
+    const { sellers, setSellers, isLoading, error } =
+        useContext(SellerContext)!;
     const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
 
-    const handleStatusChange = async (userId: string, newStatus: "pending" | "approved" | "rejected" | "suspended") => {
-        try {
-            setUpdatingIds(prev => new Set(prev).add(userId));
+    const handleStatusChange = async (
+        userId: string,
+        newStatus: "pending" | "approved" | "rejected" | "suspended"
+    ) => {
+        if (!userId) {
+            console.error("No userId provided");
+            return;
+        }
 
-            // Optimistically update UI
-            setSellers(prevSellers =>
-                prevSellers ? prevSellers.map(seller =>
-                    seller.userId === userId
-                        ? { ...seller, status: newStatus }
-                        : seller
-                ) : null
+        try {
+            setSellers(
+                (prevSellers) =>
+                    prevSellers?.map((seller) =>
+                        seller.userId === userId
+                            ? { ...seller, status: newStatus }
+                            : seller
+                    ) ?? null
             );
 
             const response = await axios.patch(`/api/seller/${userId}`, {
-                status: newStatus
+                status: newStatus,
             });
 
             if (!response.data.success) {
                 throw new Error(response.data.message);
             }
-
-        } catch (error: any) {
-            console.error("Status update failed:", error);
-            
-            // Only revert if there was an error
-            setSellers(prevSellers =>
-                prevSellers ? prevSellers.map(seller =>
-                    seller.userId === userId
-                        ? { ...seller, status: seller.status }
-                        : seller
-                ) : null
+        } catch (error) {
+            console.error("Failed to update status:", error);
+            // Revert UI on error
+            setSellers(
+                (prevSellers) =>
+                    prevSellers?.map((seller) =>
+                        seller.userId === userId
+                            ? { ...seller, status: seller.status }
+                            : seller
+                    ) ?? null
             );
-        } finally {
-            setUpdatingIds(prev => {
-                const next = new Set(prev);
-                next.delete(userId);
-                return next;
-            });
         }
     };
 

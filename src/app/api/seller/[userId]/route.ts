@@ -24,35 +24,26 @@ export async function GET(
 }
 
 export async function PATCH(
-    req: NextRequest,
+    request: NextRequest,
     { params }: { params: { userId: string } }
 ) {
     try {
-        checkToken(req);
-        const { status } = await req.json();
-        const userId = params.userId; // Access directly without destructuring
+        const { status } = await request.json();
+        const userId = params?.userId;
 
-        console.log("Raw body: ", { status });
-        console.log("userId from params: ", userId);
+        if (!userId) {
+            return NextResponse.json(
+                { success: false, message: "User ID is required" }, { status: 400 }
+            );
+        }
 
         const updatedSeller = await updateSellerStatus(status, userId);
 
-        return NextResponse.json(
-            {
-                success: true,
-                message: "Status updated successfully",
-                data: updatedSeller,
-            },
-            { status: 200 }
-        );
+        return NextResponse.json({ success: true, data: updatedSeller });
     } catch (error: any) {
-        console.error("Status update error:", error);
+        console.error("Update failed:", error);
         return NextResponse.json(
-            {
-                success: false,
-                message: error.message || "Failed to update status",
-            },
-            { status: 500 }
+            { success: false, message: error.message }, { status: 500 }
         );
     }
 }
