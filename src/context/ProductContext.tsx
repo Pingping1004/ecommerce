@@ -72,14 +72,7 @@ export const ProductProvider = ({
             if (Array.isArray(productData)) {
                 console.log("Direct array format detected");
                 setProducts(productData);
-            }
-            // Case 2: Nested array in products property
-            // else if (Array.isArray(productData.products)) {
-            //     console.log("Nested array format detected");
-            //     setProducts(productData.products);
-            // }
-            // Case 3: Invalid format
-            else {
+            } else {
                 console.error("Invalid format received:", typeof productData, productData);
                 setError("Invalid data format received");
             }

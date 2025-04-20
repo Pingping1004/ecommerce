@@ -5,6 +5,7 @@ import ClientSessionWrapper from "./ClientSessionWrapper";
 import { UserProvider } from "@/context/UserContext";
 import { ProductProvider } from "@/context/ProductContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { SellerProvider } from "@/context/sellerContext";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -59,9 +60,11 @@ export default function RootLayout({
                 <ClientSessionWrapper>
                     <AuthProvider>
                         <UserProvider>
-                            <ProductProvider>
-                                {children}
-                            </ProductProvider>
+                            <SellerProvider>
+                                <ProductProvider>
+                                    {children}
+                                </ProductProvider>
+                            </SellerProvider>
                         </UserProvider>
                     </AuthProvider>
                 </ClientSessionWrapper>

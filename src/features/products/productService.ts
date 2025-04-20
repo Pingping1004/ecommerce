@@ -65,10 +65,8 @@ export async function updateProduct(
         const existingProduct = await Product.findById(productId);
         if (!existingProduct) throw new Error("Product not found");
 
-        // Check ownership using the found product
-        const isOwner = await isOwnerOfProduct(userId, productId);
-        if (!isOwner) throw new Error("You do not own this product");
-        console.log("Is owner: ", isOwner);
+        // Check ownership using the helper function; it will throw an error if not the owner
+        await isOwnerOfProduct(userId, productId);
 
         // Now update the product using the validated _id
         console.log("Update data before passing:", updateData);
@@ -128,8 +126,9 @@ export async function isOwnerOfProduct(userId: string, productId: string) {
     console.log("User ID:", userId);
     console.log("Product Owner ID:", product.ownerId);
 
-    if (product.ownerId.toString() !== userId)
-        return new Error("You are not the owner of product");
+    if (product.ownerId.toString() !== userId) {
+        throw new Error("You are not the owner of product");
+    }
 }
 
 export async function findProductById(productId: string, userId?: string) {

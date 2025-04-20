@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/database";
 import { getToken } from "next-auth/jwt";
-import { SellerFormData } from "@/app/seller/register/page";
+import { SellerFormData } from "@/components/seller/Form";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 // Models
@@ -31,8 +31,8 @@ export const registerSeller = async (req: NextRequest, sellerFormData: SellerFor
         dbSession.startTransaction();
 
         const newSeller = new Seller({
-            userId: user._id,
             ...sellerFormData,
+            userId: user._id,
             status: "pending"
         });
 

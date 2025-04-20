@@ -7,11 +7,9 @@ import {
     getProducts,
     updateProduct,
 } from "@/features/products/productService";
-import { verifyToken } from "@/lib/jwt";
 import checkToken from "@/util/checkToken";
 
-// export const runtime = "nodejs";
-
+// Get all products
 export async function GET(req: NextRequest) {
     try {
         checkToken(req); // Verify token using the utility function
@@ -64,46 +62,7 @@ export async function POST(req: NextRequest) {
     }
 }
 
-export async function PATCH(req: NextRequest) {
-    try {
-        const data = await req.json();
-        console.log("Received update data in API:", data);
-
-        // Ensure we have both userId and productId
-        const { userId, productId, ...updatedProduct } = data;
-        // const productId = _id;
-
-        if (!productId || !userId) {
-            return NextResponse.json(
-                {
-                    error: "Missing required fields: productId and userId are required",
-                },
-                { status: 400 }
-            );
-        }
-
-        checkToken(req);
-        const product = await updateProduct(userId, productId, updatedProduct);
-
-        return NextResponse.json(
-            {
-                success: true,
-                data: product,
-            },
-            { status: 200 }
-        );
-    } catch (error: any) {
-        console.error("Failed to update product:", error);
-        return NextResponse.json(
-            {
-                success: false,
-                error: error.message || "Failed to update product",
-            },
-            { status: 500 }
-        );
-    }
-}
-
+// Delete multiple products
 export async function DELETE(req: NextRequest) {
     try {
         checkToken(req);
