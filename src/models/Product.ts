@@ -16,6 +16,7 @@ export interface ProductType extends Document {
         | "Books"
         | "Toys"
         | "N/A";
+    status?: "inventory" | "sold" | "purchased" | "shipped";
 }
 
 const ProductSchema = new Schema<ProductType>(
@@ -39,6 +40,16 @@ const ProductSchema = new Schema<ProductType>(
             ],
             default: 'N/A',
         },
+        status: {
+            type: String,
+            enum: [
+                "inventory",
+                "sold",
+                "purchased",
+                "shipped",
+            ],
+            default: 'inventory'
+        }
     },
     { timestamps: true, collection: 'Products' }
 )
