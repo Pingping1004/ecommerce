@@ -31,7 +31,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { productId:
         const { userId, ...updatedProduct } = await req.json();
         console.log("Received update data in API:", updatedProduct);
 
-        checkToken(req);
         if (!productId || !userId) {
             return NextResponse.json(
                 { error: "Missing required fields: productId and userId are required" }, 
@@ -56,7 +55,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { productId
         if (!sellerToken)return NextResponse.json({ error: 'Unauthorized, only seller can access' }, { status: 401 });
         
         const { productId } = params;
-        checkToken(req);
 
         const { userId } = await req.json();
         await deleteProduct(userId, productId);

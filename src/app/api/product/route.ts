@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const sellerToken = await sellerGuard(req);
-        if (!sellerToken)return NextResponse.json({ error: 'Unauthorized, only seller can access' }, { status: 401 });
+        if (!sellerToken) return NextResponse.json({ error: 'Unauthorized, only seller can access' }, { status: 401 });
         
         const productData = await req.json();
         // const { ownerId } = productData;
