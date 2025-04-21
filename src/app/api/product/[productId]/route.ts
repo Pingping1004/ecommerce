@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import checkToken from '@/util/checkToken';
-import { getProducts, findProductById, updateProduct, deleteProduct } from '@/features/products/productService';
+import { findProductById, updateProduct, deleteProduct } from '@/features/products/productService';
+import { sellerGuard } from '@/lib/guard/sellerGuard';
 
 // Get specific product
 export async function GET(req: NextRequest, { params }: { params: { productId: string }}) {
@@ -23,6 +24,9 @@ export async function GET(req: NextRequest, { params }: { params: { productId: s
 
 export async function PATCH(req: NextRequest, { params }: { params: { productId: string }}) {
     try {
+        const sellerToken = await sellerGuard(req);
+        if (!sellerToken)return NextResponse.json({ error: 'Unauthorized, only seller can access' }, { status: 401 });
+
         const { productId } = params;
         const { userId, ...updatedProduct } = await req.json();
         console.log("Received update data in API:", updatedProduct);
@@ -48,6 +52,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { productId:
 // Delete single product
 export async function DELETE(req: NextRequest, { params }: { params: { productId: string }}) {
     try {
+        const sellerToken = await sellerGuard(req);
+        if (!sellerToken)return NextResponse.json({ error: 'Unauthorized, only seller can access' }, { status: 401 });
+        
         const { productId } = params;
         checkToken(req);
 

@@ -4,8 +4,7 @@ import {
 } from "@/features/seller/sellerService";
 import { NextRequest, NextResponse } from "next/server";
 import checkToken from "@/util/checkToken";
-import { getToken } from "next-auth/jwt";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { adminGuard } from "@/lib/guard/adminGuard";
 
 export async function GET(
     req: NextRequest,
@@ -28,6 +27,9 @@ export async function PATCH(
     { params }: { params: { userId: string } }
 ) {
     try {
+        const adminToken = await adminGuard(request);
+        if (!adminToken) return NextResponse.json({ error: 'Unauthorized, only admin role can access' }, { status: 401 });
+        
         const { status } = await request.json();
         const userId = params?.userId;
 

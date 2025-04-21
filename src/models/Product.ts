@@ -6,6 +6,7 @@ export interface ProductType extends Document {
     name: string;
     description?: string;
     price: number;
+    quantities: number;
     category?:
         | "Apparel"
         | "Electronics"
@@ -23,6 +24,7 @@ const ProductSchema = new Schema<ProductType>(
         name: { type: String, required: true },
         description: { type: String },
         price: { type: Number, required: true },
+        quantities: { type: Number, required: true, default: 1 },
         category: {
             type: String,
             enum: [
